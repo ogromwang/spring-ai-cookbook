@@ -61,6 +61,37 @@ process_module() {
         # 复制 README.md 到 index.md
         cp "${readme_file}" "${target_file}"
 
+        # 在文档末尾添加代码链接（跳过 0.spring-ai-introduction）
+        if [[ "${relative_path}" != "0.spring-ai-introduction" ]]; then
+            # 生成 GitHub 代码链接
+            local github_url="https://github.com/dong4j/spring-ai-cookbook/tree/main/${relative_path}"
+            
+            # 检查文件末尾是否已经有代码链接标记
+            if grep -q "<!-- 代码链接 -->" "${target_file}" 2>/dev/null; then
+                # 如果已有代码链接，删除从 "## 📦 代码示例" 到文件末尾的所有内容
+                # 使用 sed 删除从 "## 📦 代码示例" 开始到文件末尾的所有行
+                local temp_file=$(mktemp)
+                sed '/^## 📦 代码示例$/,$d' "${target_file}" > "${temp_file}" 2>/dev/null
+                mv "${temp_file}" "${target_file}"
+            fi
+            
+            # 在文件末尾添加代码链接
+            {
+                echo ""
+                echo "---"
+                echo ""
+                echo "## 📦 代码示例"
+                echo ""
+                echo "查看完整代码示例："
+                echo ""
+                echo "[${relative_path}](${github_url})"
+                echo ""
+                echo "<!-- 代码链接 -->"
+            } >> "${target_file}"
+            
+            echo -e "  ${BLUE}→${NC} 已添加/更新代码链接"
+        fi
+
         echo -e "${GREEN}✓${NC} ${relative_path}/README.md -> docs/${relative_path}/index.md"
         ((SYNCED_COUNT++))
 
