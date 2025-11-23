@@ -145,6 +145,39 @@ mvn spring-boot:run
   </a>
 </div>
 
+---
+
+<script setup>
+import { VPTeamMembers } from 'vitepress/theme'
+
+const members = [
+  {
+    avatar: 'https://www.github.com/dong4j.png',
+    name: 'dong4j',
+    title: 'Creator',
+    org: 'Zeka.Stack',
+    orgLink: 'https://github.com/zeka-stack',
+    desc: '司机带你开车',
+    // 赞助页面 url
+    sponsor: '',
+    // sponsor 链接的文本，默认为 'Sponsor'
+    actionText: '',
+    links: [
+      { icon: 'github', link: 'https://github.com/dong4j' },
+      { icon: 'twitter', link: 'https://twitter.com/dong4j' }
+    ]
+  },
+]
+</script>
+
+### Our Team
+
+Say hello to our awesome team.
+
+<VPTeamMembers size="medium" :members="members" />
+
+---
+
 ## 👤 关于作者
 
 <div class="author-links">

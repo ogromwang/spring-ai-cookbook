@@ -17,6 +17,14 @@
     --vp-home-hero-image-filter: drop-shadow(0 12px 40px rgba(100, 108, 255, 0.2));
 }
 
+/* .vitepress/theme/style/var.css */
+.VPDoc h1 {
+    background: -webkit-linear-gradient(10deg, #bd34fe 5%, #e43498 15%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
 .medium-zoom-overlay {
     background-color: var(--vp-c-bg) !important;
     z-index: 100;
