@@ -4,6 +4,8 @@ import path from 'path'
 import {fileURLToPath} from 'url'
 import {InlineLinkPreviewElementTransform} from '@nolebase/vitepress-plugin-inline-link-preview/markdown-it'
 import {GitChangelog, GitChangelogMarkdownSection,} from '@nolebase/vitepress-plugin-git-changelog/vite'
+import {BiDirectionalLinks} from '@nolebase/markdown-it-bi-directional-links'
+import timeline from "vitepress-markdown-timeline";
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -246,6 +248,8 @@ export default defineConfig(
         config(md) {
           // other markdown-it configurations...
           md.use(InlineLinkPreviewElementTransform)
+          md.use(BiDirectionalLinks())
+          md.use(timeline)
         }
       },
 

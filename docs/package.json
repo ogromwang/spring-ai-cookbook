@@ -10,12 +10,14 @@
     "sync": "bash sync-docs.sh"
   },
   "devDependencies": {
+    "@nolebase/markdown-it-bi-directional-links": "^2.18.2",
     "@nolebase/vitepress-plugin-enhanced-mark": "^2.18.2",
     "@nolebase/vitepress-plugin-enhanced-readabilities": "^2.18.2",
     "@nolebase/vitepress-plugin-git-changelog": "^2.18.2",
     "@nolebase/vitepress-plugin-highlight-targeted-heading": "^2.18.2",
     "@nolebase/vitepress-plugin-index": "^2.18.2",
     "@nolebase/vitepress-plugin-inline-link-preview": "^2.18.2",
-    "vitepress": "^1.6.3"
+    "vitepress": "^1.6.3",
+    "vitepress-markdown-timeline": "^1.2.2"
   }
 }

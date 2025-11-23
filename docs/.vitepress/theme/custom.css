@@ -3,7 +3,7 @@
  */
 
 :root {
-    --vp-c-brand: #646cff;
+    --vp-c-brand: #0daa6b;
     --vp-c-brand-light: #747bff;
     --vp-c-brand-lighter: #9499ff;
     --vp-c-brand-dark: #535bf2;
@@ -17,12 +17,10 @@
     --vp-home-hero-image-filter: drop-shadow(0 12px 40px rgba(100, 108, 255, 0.2));
 }
 
-
 /* 右侧大纲容器宽度 */
 .aside-container {
     width: 400px !important;
 }
-
 
 /* Hero 区域动画 */
 .VPHero .name {

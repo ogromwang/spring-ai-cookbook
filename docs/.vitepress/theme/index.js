@@ -16,6 +16,7 @@ import {NolebaseGitChangelogPlugin} from '@nolebase/vitepress-plugin-git-changel
 
 import '@nolebase/vitepress-plugin-git-changelog/client/style.css'
 import '@nolebase/vitepress-plugin-enhanced-mark/client/style.css'
+import "vitepress-markdown-timeline/dist/theme/index.css";
 
 import './custom.css'
 
