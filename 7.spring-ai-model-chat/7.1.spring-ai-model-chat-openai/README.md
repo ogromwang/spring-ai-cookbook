@@ -1,2 +1,2 @@
-# Chat Model - OpenAI
+# OpenAI
 

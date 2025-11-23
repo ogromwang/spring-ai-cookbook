@@ -200,6 +200,7 @@ export default defineConfig(
     {
 
       vite: {
+        publicDir: path.resolve(__dirname, '../public'),
         plugins: [
           groupIconVitePlugin(
               {

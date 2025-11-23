@@ -10,7 +10,7 @@ hero:
     alt: Spring AI Cookbook
   actions:
     - theme: brand
-      text: 🔥 项目简介
+      text: 🔥 Spring AI 简介
       link: /0.spring-ai-introduction/
     - theme: alt
       text: 🚀 快速开始

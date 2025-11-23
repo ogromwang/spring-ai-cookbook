@@ -3,11 +3,11 @@
  */
 
 :root {
-    --vp-c-brand: #0daa6b;
-    --vp-c-brand-light: #747bff;
-    --vp-c-brand-lighter: #9499ff;
-    --vp-c-brand-dark: #535bf2;
-    --vp-c-brand-darker: #454ce1;
+    --vp-c-brand: #6DB33F;
+    --vp-c-brand-light: #7dc351;
+    --vp-c-brand-lighter: #8ed363;
+    --vp-c-brand-dark: #5d9d35;
+    --vp-c-brand-darker: #4d8529;
 
     /* 渐变背景 */
     --vp-home-hero-name-color: transparent;
@@ -104,6 +104,37 @@
 .VPHero .action[href*="github"]:hover {
     background: #218838 !important;
     border-color: #1e7e34 !important;
+}
+
+/* 快速开始按钮绿色样式 - 使用更高优先级的选择器 */
+.VPHero .actions a[href="/1.spring-ai-started/"],
+.VPHero .actions a[href*="1.spring-ai-started"],
+.VPHero .action[href="/1.spring-ai-started/"],
+.VPHero .action[href*="1.spring-ai-started"],
+.VPHero .actions .action.alt[href*="1.spring-ai-started"],
+a.VPButton.alt[href*="1.spring-ai-started"],
+a.VPButton[href*="1.spring-ai-started"],
+.VPHero a[href*="1.spring-ai-started"] {
+    background: #6DB33F !important;
+    background-color: #6DB33F !important;
+    border-color: #6DB33F !important;
+    border: 1px solid #6DB33F !important;
+    color: #fff !important;
+}
+
+.VPHero .actions a[href="/1.spring-ai-started/"]:hover,
+.VPHero .actions a[href*="1.spring-ai-started"]:hover,
+.VPHero .action[href="/1.spring-ai-started/"]:hover,
+.VPHero .action[href*="1.spring-ai-started"]:hover,
+.VPHero .actions .action.alt[href*="1.spring-ai-started"]:hover,
+a.VPButton.alt[href*="1.spring-ai-started"]:hover,
+a.VPButton[href*="1.spring-ai-started"]:hover,
+.VPHero a[href*="1.spring-ai-started"]:hover {
+    background: #5d9d35 !important;
+    background-color: #5d9d35 !important;
+    border-color: #5d9d35 !important;
+    border: 1px solid #5d9d35 !important;
+    color: #fff !important;
 }
 
 /* Features 卡片动画 */

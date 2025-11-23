@@ -1,4 +1,4 @@
-# Vector Databases 向量数据库
+# 向量数据库
 
 ---
 
