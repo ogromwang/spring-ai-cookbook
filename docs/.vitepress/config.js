@@ -262,6 +262,12 @@ export default defineConfig(
           'data-prefix': 'busuanzi',
           'data-style': 'default',
           'data-pjax': 'true'
+        }],
+        ['script', {
+          src: 'https://cdn.dong4j.site/source/static/umami.self.js',
+          defer: true,
+          'data-host-url': 'https://umami.dong4j.site',
+          'data-website-id': '1e2e22cc-637c-49e6-aeaf-c2bd0b47f92b'
         }]
       ],
 
@@ -298,8 +304,9 @@ export default defineConfig(
         logo: '/logo.png',
 
         nav: [
-          {text: '首页', link: '/'},
-          {text: '开始', link: '/1.spring-ai-started/'}
+          {text: '🏠 首页', link: '/'},
+          {text: '🚀 开始', link: '/1.spring-ai-started/'},
+          {text: '📊 统计', link: 'https://umami.dong4j.site/share/o0wIhLdP1EwFcdCt/spring-ai.dong4j.site', target: '_blank'}
         ],
 
         sidebar: generateSidebar(),

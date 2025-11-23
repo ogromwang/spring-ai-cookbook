@@ -99,8 +99,23 @@ export const Theme = {
       };
       router.onAfterRouteChange = () => {
         NProgress.done(); // 停止进度条
-        // 路由切换后重新加载 busuanzi 统计数据
+
         if (inBrowser) {
+          // 触发 Umami 页面浏览跟踪（SPA 路由切换）
+          setTimeout(() => {
+            try {
+              // Umami 自动跟踪，但为了确保 SPA 路由切换也能跟踪，手动触发
+              if (window.umami && typeof window.umami.track === 'function') {
+                window.umami.track()
+              } else if (window.umami && typeof window.umami === 'function') {
+                window.umami()
+              }
+            } catch (error) {
+              console.warn('Error tracking umami pageview:', error)
+            }
+          }, 100)
+
+          // 路由切换后重新加载 busuanzi 统计数据
           setTimeout(() => {
             try {
               // 手动调用 busuanzi API 获取页面数据
