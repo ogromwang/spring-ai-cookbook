@@ -53,20 +53,65 @@ cat ~/.ssh/github_actions_deploy
 
 ## 工作流程
 
-1. **触发条件**：
-    - 推送到 `main` 或 `master` 分支
-    - `docs/` 目录下的文件有变更
-    - 手动触发（workflow_dispatch）
+### 触发方式
 
-2. **构建步骤**：
-    - 检出代码
-    - 设置 Node.js 环境
-    - 安装依赖 (`npm install`)
-    - 构建文档 (`npm run build`)
+**默认配置：仅手动触发（推荐）**
 
-3. **部署步骤**：
-    - 配置 SSH 密钥
-    - 使用 rsync 同步文件到 ECS 服务器
+Workflow 默认配置为**仅手动触发**，不会在每次提交时自动执行。这样可以：
+
+- 节省 GitHub Actions 运行时间
+- 避免不必要的部署
+- 完全控制部署时机
+
+**手动触发步骤**：
+
+1. 进入 GitHub 仓库页面
+2. 点击 **Actions** 标签
+3. 选择 **Deploy Docs to ECS** workflow
+4. 点击 **Run workflow** 按钮
+5. 选择分支（通常是 `main` 或 `master`）
+6. （可选）输入部署说明
+7. 点击 **Run workflow** 开始执行
+
+**自动触发（条件触发）**：
+
+如果启用了自动触发（`push` 已取消注释），workflow 会在以下条件**同时满足**时执行：
+
+1. 推送到 `main` 或 `master` 分支
+2. `docs/` 目录或 workflow 文件有变更
+3. **提交信息中包含 `[deploy-docs]` 关键词**
+
+**触发示例**：
+
+```bash
+# ✅ 会触发部署
+git commit -m "更新文档内容 [deploy-docs]"
+git commit -m "[deploy-docs] 修复文档错误"
+git commit -m "docs: 更新 README [deploy-docs]"
+
+# ❌ 不会触发部署（缺少 [deploy-docs]）
+git commit -m "更新文档内容"
+git commit -m "修复代码bug"
+```
+
+**工作原理**：
+
+- 如果提交信息中**包含** `[deploy-docs]`，workflow 会执行部署
+- 如果提交信息中**不包含** `[deploy-docs]`，即使 `docs/` 目录有变更，workflow 也不会执行
+- 手动触发（workflow_dispatch）不受此限制，随时可以执行
+
+### 构建步骤
+
+1. **同步文档**：执行 `sync-docs.sh` 脚本，同步子模块的 README.md 和图片资源
+2. **设置环境**：设置 Node.js 环境
+3. **安装依赖**：执行 `npm install`
+4. **构建文档**：执行 `npm run build`
+
+### 部署步骤
+
+1. **配置 SSH**：设置 SSH 密钥用于免密登录
+2. **验证构建**：检查构建输出目录是否存在
+3. **同步文件**：使用 rsync 同步文件到 ECS 服务器
     - `--delete` 选项确保目标目录与源目录完全一致（会删除目标目录中不存在的文件）
 
 ## 注意事项

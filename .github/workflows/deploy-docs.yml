@@ -9,19 +9,24 @@ on:
         required: false
         default: '手动部署文档'
   
-  # 可选：只在特定提交信息时自动触发（取消注释以启用）
-  # push:
-  #   branches:
-  #     - main
-  #     - master
-  #   paths:
-  #     - 'docs/**'
-  #     - '.github/workflows/deploy-docs.yml'
-  # 注意：如果启用自动触发，需要在提交信息中包含 [deploy-docs] 才会执行
+  # 可选：只在特定提交信息时自动触发（已启用）
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - 'docs/**'
+      - '.github/workflows/deploy-docs.yml'
+  # 注意：自动触发时，需要在提交信息中包含 [deploy-docs] 才会执行部署
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
+    # 如果是 push 触发，检查提交信息是否包含 [deploy-docs]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && contains(github.event.head_commit.message, '[deploy-docs]'))
 
     steps:
       - name: Checkout code
@@ -71,6 +76,7 @@ jobs:
       - name: Deploy to ECS
         run: |
           echo "🚀 开始部署到 ECS 服务器..."
+          echo "部署说明: ${{ github.event.inputs.deploy_message || '手动部署文档' }}"
 
           rsync -avz --delete \
             --progress \
@@ -81,6 +87,7 @@ jobs:
 
           if [ $? -eq 0 ]; then
             echo "✅ 文档已成功部署到 ECS 服务器"
+            echo "部署路径: ${{ secrets.ECS_DEPLOY_PATH }}"
           else
             echo "❌ 部署失败，请检查日志"
             exit 1
