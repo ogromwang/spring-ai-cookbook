@@ -197,8 +197,10 @@ function generateSidebar() {
 
 export default defineConfig(
     {
+
       vite: {
         plugins: [
+
           groupIconVitePlugin({
                                 // 自定义图标: https://github.com/vscode-icons/vscode-icons/wiki/ListOfFiles
                                 customIcon: {
@@ -230,6 +232,7 @@ export default defineConfig(
           ],
         },
       },
+
       title: 'Spring AI Cookbook',
       description: 'Spring AI 教程文档',
       base: '/',

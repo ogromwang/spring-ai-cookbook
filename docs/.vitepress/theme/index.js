@@ -1,4 +1,4 @@
-import {h} from 'vue'
+import {h, nextTick, onMounted, watch} from 'vue'
 import DefaultTheme from 'vitepress/theme'
 import 'virtual:group-icons.css'
 import {
@@ -17,11 +17,27 @@ import {NolebaseGitChangelogPlugin} from '@nolebase/vitepress-plugin-git-changel
 import '@nolebase/vitepress-plugin-git-changelog/client/style.css'
 import '@nolebase/vitepress-plugin-enhanced-mark/client/style.css'
 import "vitepress-markdown-timeline/dist/theme/index.css";
+import {useRoute} from 'vitepress'
+import mediumZoom from 'medium-zoom'
 
 import './custom.css'
 
 export const Theme = {
   extends: DefaultTheme,
+  setup() {
+    const route = useRoute()
+    const initZoom = () => {
+      // 为所有图片增加缩放功能
+      mediumZoom('.main img', {background: 'var(--vp-c-bg)'})
+    }
+    onMounted(() => {
+      initZoom()
+    })
+    watch(
+        () => route.path,
+        () => nextTick(() => initZoom())
+    )
+  },
   Layout: () => {
     return h(DefaultTheme.Layout, null, {
       // A enhanced readabilities menu for wider screens

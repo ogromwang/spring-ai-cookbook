@@ -17,6 +17,19 @@
     --vp-home-hero-image-filter: drop-shadow(0 12px 40px rgba(100, 108, 255, 0.2));
 }
 
+.medium-zoom-overlay {
+    background-color: var(--vp-c-bg) !important;
+    z-index: 100;
+}
+
+.medium-zoom-overlay ~ img {
+    z-index: 101;
+}
+
+.medium-zoom--opened .medium-zoom-overlay {
+    opacity: 0.9 !important;
+}
+
 /* 右侧大纲容器宽度 */
 .aside-container {
     width: 400px !important;
@@ -35,9 +48,12 @@
 }
 
 @keyframes gradient-shift {
-    0%, 100% {
+
+    0%,
+    100% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
@@ -49,9 +65,12 @@
 }
 
 @keyframes float {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0px);
     }
+
     50% {
         transform: translateY(-20px);
     }
