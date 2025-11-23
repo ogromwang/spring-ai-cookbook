@@ -34,7 +34,7 @@ npm run preview
 
 ## 同步文档
 
-当子模块的 README.md 更新后，需要同步到 docs 目录：
+当子模块的 README.md 或图片资源更新后，需要同步到 docs 目录：
 
 ```bash
 npm run sync
@@ -42,10 +42,17 @@ npm run sync
 bash sync-docs.sh
 ```
 
+同步脚本会自动：
+
+- 复制 README.md 到对应的 `index.md`
+- 复制 `imgs/` 目录下的所有图片资源
+- 保持相对路径不变（`./imgs/xxx.webp` 在 VitePress 中能正常显示）
+
 ## 文档结构
 
 - `index.md` - 首页
 - `*.spring-ai-*/index.md` - 各模块文档（从子模块 README.md 同步）
+- `*.spring-ai-*/imgs/` - 各模块的图片资源（从子模块 imgs 目录同步）
 
 ## 多层级模块支持
 

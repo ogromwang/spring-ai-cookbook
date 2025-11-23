@@ -4,9 +4,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 /**
- * Model Chat 应用测试类
+ * Model Chat OpenAI 应用测试类
  *
- * <p>用于集成测试 ModelChatApplication 的上下文加载和基本功能验证
+ * <p>用于集成测试 ModelChatOpenaiApplication 的上下文加载和基本功能验证
  *
  * @author zeka.stack.team
  * @version 1.0.0
@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
  * @since 1.0.0
  */
 @SpringBootTest
-class ModelChatApplicationTest {
+class ModelChatOpenaiApplicationTest {
     /**
      * 测试 Spring 上下文加载功能
      *
@@ -24,3 +24,4 @@ class ModelChatApplicationTest {
     @Test
     void contextLoads() {}
 }
+

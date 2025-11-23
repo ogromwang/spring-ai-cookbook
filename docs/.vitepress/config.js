@@ -1,4 +1,158 @@
 import {defineConfig} from 'vitepress'
+import fs from 'fs'
+import path from 'path'
+import {fileURLToPath} from 'url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const docsDir = path.resolve(__dirname, '..')
+
+/**
+ * 获取模块的显示名称
+ */
+function getModuleDisplayName(modulePath) {
+  const indexPath = path.join(modulePath, 'index.md')
+  if (fs.existsSync(indexPath)) {
+    const content = fs.readFileSync(indexPath, 'utf-8')
+    const match = content.match(/^#\s+(.+)$/m)
+    if (match) {
+      return match[1].trim()
+    }
+  }
+  return path.basename(modulePath)
+}
+
+/**
+ * 递归查找所有模块（从 docs 目录）
+ */
+function findModules(dir, basePath = '') {
+  const modules = []
+
+  if (!fs.existsSync(dir)) {
+    return modules
+  }
+
+  const items = fs.readdirSync(dir, {withFileTypes: true})
+
+  for (const item of items) {
+    // 跳过隐藏文件和特殊目录
+    if (item.name.startsWith('.') ||
+        item.name === 'node_modules' ||
+        item.name === '.vitepress') {
+      continue
+    }
+
+    if (item.isDirectory() && /^\d/.test(item.name)) {
+      const modulePath = path.join(dir, item.name)
+      const relativePath = basePath ? `${basePath}/${item.name}` : item.name
+      const indexPath = path.join(modulePath, 'index.md')
+
+      if (fs.existsSync(indexPath)) {
+        const displayName = getModuleDisplayName(modulePath)
+        const link = `/${relativePath}/`
+
+        const moduleInfo = {
+          text: displayName,
+          link: link
+        }
+
+        // 递归查找子模块
+        const subModules = findModules(modulePath, relativePath)
+        if (subModules.length > 0) {
+          moduleInfo.items = subModules
+        }
+
+        modules.push(moduleInfo)
+      } else {
+        // 即使没有 index.md，也继续查找子模块
+        const subModules = findModules(modulePath, relativePath)
+        modules.push(...subModules)
+      }
+    }
+  }
+
+  // 按目录名排序
+  return modules.sort((a, b) => {
+    const aMatch = a.link.match(/(\d+(?:\.\d+)?)/)
+    const bMatch = b.link.match(/(\d+(?:\.\d+)?)/)
+    if (!aMatch || !bMatch) {
+      return 0
+    }
+
+    const aNum = aMatch[1].split('.').map(n => parseInt(n.padStart(3, '0')))
+    const bNum = bMatch[1].split('.').map(n => parseInt(n.padStart(3, '0')))
+
+    for (let i = 0; i < Math.max(aNum.length, bNum.length); i++) {
+      const aVal = aNum[i] || 0
+      const bVal = bNum[i] || 0
+      if (aVal !== bVal) {
+        return aVal - bVal
+      }
+    }
+    return 0
+  })
+}
+
+/**
+ * 将模块分类
+ */
+function categorizeModules(modules) {
+  const categorized = {}
+
+  for (const module of modules) {
+    const moduleNum = module.link.match(/\/(\d+)/)?.[1]
+    if (!moduleNum) {
+      continue
+    }
+
+    const num = parseInt(moduleNum)
+
+    let category = '其他'
+    if (num <= 2) {
+      category = '入门'
+    } else if (num <= 5) {
+      category = '核心功能'
+    } else if (num <= 13) {
+      category = 'Model API'
+    } else if (num <= 18) {
+      category = '高级功能'
+    } else {
+      category = '部署与测试'
+    }
+
+    if (!categorized[category]) {
+      categorized[category] = []
+    }
+    categorized[category].push(module)
+  }
+
+  return categorized
+}
+
+/**
+ * 生成侧边栏配置
+ */
+function generateSidebar() {
+  const allModules = findModules(docsDir)
+  const categorized = categorizeModules(allModules)
+
+  const sidebar = {
+    '/': []
+  }
+
+  const categoryOrder = ['入门', '核心功能', 'Model API', '高级功能', '部署与测试']
+
+  for (const category of categoryOrder) {
+    if (categorized[category] && categorized[category].length > 0) {
+      sidebar['/'].push({
+                          text: category,
+                          items: categorized[category]
+                        })
+    }
+  }
+
+  return sidebar
+}
 
 export default defineConfig({
                               title: 'Spring AI Cookbook',
@@ -23,55 +177,7 @@ export default defineConfig({
                                   {text: '开始', link: '/1.spring-ai-started/'}
                                 ],
 
-                                sidebar: {
-                                  '/': [
-                                    {
-                                      text: '入门',
-                                      items: [
-                                        {text: '快速开始', link: '/1.spring-ai-started/'},
-                                        {text: 'Chat Client API', link: '/2.spring-ai-chat-client/'}
-                                      ]
-                                    },
-                                    {
-                                      text: '核心功能',
-                                      items: [
-                                        {text: 'Prompts', link: '/3.spring-ai-prompts/'},
-                                        {text: 'Structured Output', link: '/4.spring-ai-structured/'},
-                                        {text: 'Multimodality', link: '/5.spring-ai-multimodality/'}
-                                      ]
-                                    },
-                                    {
-                                      text: 'Model API',
-                                      items: [
-                                        {text: 'Model API', link: '/6.spring-ai-model/'},
-                                        {text: 'Chat Model', link: '/7.spring-ai-model-chat/'},
-                                        {text: 'Embedding Model', link: '/8.spring-ai-model-embedding/'},
-                                        {text: 'Image Model', link: '/9.spring-ai-model-image/'},
-                                        {text: 'Audio Model', link: '/10.spring-ai-model-audio/'},
-                                        {text: 'Moderation Models', link: '/11.spring-ai-model-moderation/'},
-                                        {text: 'Chat Memory', link: '/12.spring-ai-model-memory/'},
-                                        {text: 'Tool Calling', link: '/13.spring-ai-model-tool-calling/'}
-                                      ]
-                                    },
-                                    {
-                                      text: '高级功能',
-                                      items: [
-                                        {text: 'MCP', link: '/14.spring-ai-mcp/'},
-                                        {text: 'RAG', link: '/15.spring-ai-rag/'},
-                                        {text: 'Model Evaluation', link: '/16.spring-ai-model-evaluation/'},
-                                        {text: 'Vector Database', link: '/17.spring-ai-vector-database/'},
-                                        {text: 'Observability', link: '/18.spring-ai-observability/'}
-                                      ]
-                                    },
-                                    {
-                                      text: '部署与测试',
-                                      items: [
-                                        {text: 'Docker Compose', link: '/19.spring-ai-docker/'},
-                                        {text: 'Testcontainers', link: '/20.spring-ai-testcontainer/'}
-                                      ]
-                                    }
-                                  ]
-                                },
+                                sidebar: generateSidebar(),
 
                                 socialLinks: [
                                   {icon: 'github', link: 'https://github.com/dong4j/spring-ai-cookbook'}
@@ -100,4 +206,3 @@ export default defineConfig({
                                 }
                               }
                             })
-
