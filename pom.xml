@@ -34,7 +34,6 @@
         <java.version>25</java.version>
         <spring-ai.version>1.1.0</spring-ai.version>
         <google-java-format.version>1.23.0</google-java-format.version>
-        <checkstyle.version>10.17.0</checkstyle.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -124,6 +123,20 @@
                     <execution>
                         <goals>
                             <goal>format</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Checkstyle -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
                         </goals>
                     </execution>
                 </executions>
