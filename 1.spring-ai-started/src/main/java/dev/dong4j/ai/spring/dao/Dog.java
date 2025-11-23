@@ -13,5 +13,4 @@ import org.springframework.data.annotation.Id;
  * @date 2025.11.23
  * @since 1.0.0
  */
-record Dog(@Id int id, String name, String owner, String description) {
-}
+record Dog(@Id int id, String name, String owner, String description) {}

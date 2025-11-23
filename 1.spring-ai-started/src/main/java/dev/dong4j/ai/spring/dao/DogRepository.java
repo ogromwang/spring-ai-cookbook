@@ -13,6 +13,4 @@ import org.springframework.data.repository.ListCrudRepository;
  * @date 2025.11.23
  * @since 1.0.0
  */
-interface DogRepository extends ListCrudRepository<Dog, Integer> {
-}
-
+interface DogRepository extends ListCrudRepository<Dog, Integer> {}
