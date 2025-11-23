@@ -185,9 +185,9 @@ a:hover {
     display: none !important;
 }
 
-/* 调整 content 的 padding */
+/* 调整 content 的底部 padding */
 .content {
-    padding: 0 32px 32px !important;
+    padding-bottom: 32px !important;
 }
 
 /* 响应式优化 */
