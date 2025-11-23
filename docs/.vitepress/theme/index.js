@@ -15,6 +15,7 @@ import '@nolebase/vitepress-plugin-highlight-targeted-heading/client/style.css' 
 import {NolebaseGitChangelogPlugin} from '@nolebase/vitepress-plugin-git-changelog/client'
 
 import '@nolebase/vitepress-plugin-git-changelog/client/style.css'
+import '@nolebase/vitepress-plugin-enhanced-mark/client/style.css'
 
 import './custom.css'
 
