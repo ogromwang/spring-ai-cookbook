@@ -91,3 +91,87 @@ docs/
 - `sync-docs.sh` - 文档同步脚本
 - `generate-sidebar.js` - 侧边栏生成脚本（可选）
 
+## 代码图标
+
+### 使用方式
+
+```js [vite.config.js]
+import legacy from '@vitejs/plugin-legacy'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+    }),
+  ],
+})
+```
+
+### 图标映射
+
+```javascript
+export const builtinIcons = {
+  // package managers
+  'pnpm': 'vscode-icons:file-type-light-pnpm',
+  'npm': 'vscode-icons:file-type-npm',
+  'yarn': 'vscode-icons:file-type-yarn',
+  'bun': 'vscode-icons:file-type-bun',
+  'deno': 'vscode-icons:file-type-deno',
+  // frameworks
+  'vue': 'vscode-icons:file-type-vue',
+  'svelte': 'vscode-icons:file-type-svelte',
+  'angular': 'vscode-icons:file-type-angular',
+  'react': 'vscode-icons:file-type-reactjs',
+  'next': 'vscode-icons:file-type-light-next',
+  'nuxt': 'vscode-icons:file-type-nuxt',
+  'solid': 'logos:solidjs-icon',
+  'astro': 'vscode-icons:file-type-light-astro',
+  'qwik': 'logos:qwik-icon',
+  'ember': 'vscode-icons:file-type-ember',
+  // bundlers
+  'rollup': 'vscode-icons:file-type-rollup',
+  'webpack': 'vscode-icons:file-type-webpack',
+  'vite': 'vscode-icons:file-type-vite',
+  'esbuild': 'vscode-icons:file-type-esbuild',
+  // configuration files
+  'package.json': 'vscode-icons:file-type-node',
+  'tsconfig.json': 'vscode-icons:file-type-tsconfig',
+  '.npmrc': 'vscode-icons:file-type-npm',
+  '.editorconfig': 'vscode-icons:file-type-editorconfig',
+  '.eslintrc': 'vscode-icons:file-type-eslint',
+  '.eslintignore': 'vscode-icons:file-type-eslint',
+  'eslint.config': 'vscode-icons:file-type-eslint',
+  '.gitignore': 'vscode-icons:file-type-git',
+  '.gitattributes': 'vscode-icons:file-type-git',
+  '.env': 'vscode-icons:file-type-dotenv',
+  '.env.example': 'vscode-icons:file-type-dotenv',
+  '.vscode': 'vscode-icons:file-type-vscode',
+  'tailwind.config': 'vscode-icons:file-type-tailwind',
+  'uno.config': 'vscode-icons:file-type-unocss',
+  'unocss.config': 'vscode-icons:file-type-unocss',
+  '.oxlintrc': 'vscode-icons:file-type-oxlint',
+  'vue.config': 'vscode-icons:file-type-vueconfig',
+  // filename extensions
+  '.mts': 'vscode-icons:file-type-typescript',
+  '.cts': 'vscode-icons:file-type-typescript',
+  '.ts': 'vscode-icons:file-type-typescript',
+  '.tsx': 'vscode-icons:file-type-typescript',
+  '.mjs': 'vscode-icons:file-type-js',
+  '.cjs': 'vscode-icons:file-type-js',
+  '.json': 'vscode-icons:file-type-json',
+  '.js': 'vscode-icons:file-type-js',
+  '.jsx': 'vscode-icons:file-type-js',
+  '.md': 'vscode-icons:file-type-markdown',
+  '.py': 'vscode-icons:file-type-python',
+  '.ico': 'vscode-icons:file-type-favicon',
+  '.html': 'vscode-icons:file-type-html',
+  '.css': 'vscode-icons:file-type-css',
+  '.scss': 'vscode-icons:file-type-scss',
+  '.yml': 'vscode-icons:file-type-light-yaml',
+  '.yaml': 'vscode-icons:file-type-light-yaml',
+  '.php': 'vscode-icons:file-type-php',
+  '.gjs': 'vscode-icons:file-type-glimmer',
+  '.gts': 'vscode-icons:file-type-glimmer',
+}
+```

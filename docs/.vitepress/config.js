@@ -6,6 +6,7 @@ import {InlineLinkPreviewElementTransform} from '@nolebase/vitepress-plugin-inli
 import {GitChangelog, GitChangelogMarkdownSection,} from '@nolebase/vitepress-plugin-git-changelog/vite'
 import {BiDirectionalLinks} from '@nolebase/markdown-it-bi-directional-links'
 import timeline from "vitepress-markdown-timeline";
+import {groupIconMdPlugin, groupIconVitePlugin} from 'vitepress-plugin-group-icons'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -198,6 +199,15 @@ export default defineConfig(
     {
       vite: {
         plugins: [
+          groupIconVitePlugin({
+                                // 自定义图标: https://github.com/vscode-icons/vscode-icons/wiki/ListOfFiles
+                                customIcon: {
+                                  'java': 'vscode-icons:file-type-java',
+                                  'xml': 'vscode-icons:file-type-xml',
+                                  'maven': 'vscode-icons:file-type-maven',
+                                  'unplugin': 'https://unplugin.unjs.io/logo_light.svg',
+                                },
+                              }),
           GitChangelog({
                          // Fill in your repository URL here
                          repoURL: () => 'https://github.com/dong4j/spring-ai-cookbook',
@@ -250,6 +260,9 @@ export default defineConfig(
           md.use(InlineLinkPreviewElementTransform)
           md.use(BiDirectionalLinks())
           md.use(timeline)
+          md.use(groupIconMdPlugin, {
+            titleBar: {includeSnippet: true},
+          })
         }
       },
 

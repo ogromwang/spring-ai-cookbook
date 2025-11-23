@@ -415,7 +415,7 @@ Spring AI 支持两种工具调用方式：
 
 无论是 Spring AI、LangChain、OpenAI Function Calling 还是 MCP Tool，工具本身都使用严格的参数 schema 定义：
 
-```json
+```json [.json]
 {
   "name": "publishBlog",
   "parameters": {

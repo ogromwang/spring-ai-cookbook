@@ -22,3 +22,58 @@
 do some thing3
 do some thing4
 :::
+
+::: code-group
+
+```sh [npm]
+npm install vitepress-plugin-group-icons
+```
+
+```sh [yarn]
+yarn add vitepress-plugin-group-icons
+```
+
+```sh [pnpm]
+pnpm add vitepress-plugin-group-icons
+```
+
+```sh [bun]
+bun add vitepress-plugin-group-icons
+```
+
+:::
+
+```js [vite.config.js]
+import legacy from '@vitejs/plugin-legacy'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [
+    legacy({
+      targets: ['defaults', 'not IE 11'],
+    }),
+  ],
+})
+```
+
+```json [.json]
+{
+  "name": "publishBlog",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "title": {"type": "string"},
+      "content": {"type": "string"},
+      "tags": {"type": "array", "items": {"type": "string"}}
+    },
+    "required": ["title", "content"]
+  }
+}
+```
+
+```java [java]
+public class HelloWorld {}
+```
+
+```xml [xml]
+```
