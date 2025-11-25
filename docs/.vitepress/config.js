@@ -315,6 +315,7 @@ export default defineConfig(
                   'java': 'vscode-icons:file-type-java',
                   'bash': 'vscode-icons:file-type-shell',
                   'shell': 'vscode-icons:file-type-shell',
+                  'sh': 'vscode-icons:file-type-shell',
                   'xml': 'vscode-icons:file-type-xml',
                   'maven': 'vscode-icons:file-type-maven',
                   'unplugin': 'https://unplugin.unjs.io/logo_light.svg',

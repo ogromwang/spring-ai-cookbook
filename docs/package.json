@@ -7,7 +7,8 @@
     "dev": "vitepress dev",
     "build": "vitepress build",
     "preview": "vitepress preview",
-    "sync": "bash sync-docs.sh"
+    "sync": "bash sync-docs.sh",
+    "clean": "rm -rf [0-9]* .vitepress/cache .vitepress/dist"
   },
   "devDependencies": {
     "@nolebase/markdown-it-bi-directional-links": "^2.18.2",

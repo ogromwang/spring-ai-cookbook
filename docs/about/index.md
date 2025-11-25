@@ -421,8 +421,6 @@ public class ChatController {
 
 [[guide/index|Spring AI 简介]]
 
-[[1.spring-ai-started/index|快速开始]]
-
 #### GitHub 风格警报
 
 使用 GitHub 风格的警报框突出重要信息：
