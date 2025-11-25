@@ -51,9 +51,9 @@ spring-ai-cookbook/
 ├── 20.spring-ai-testcontainer/         # 测试容器
 └── docs
     ├── .vitepress/                     # VitePress 配置目录
-    ├── guide\                          # 快速指引
-    ├── action\                         # 实战
-    ├── about\                          # 关于
+    ├── guide/                          # 快速指引
+    ├── action/                         # 实战
+    ├── about/                          # 关于
     ├── convert-images-to-webp.sh       # 图片转 WebP 格式脚本
     ├── deploy.sh                       # 部署脚本
     └── sync-docs.sh                    # 文档同步脚本
