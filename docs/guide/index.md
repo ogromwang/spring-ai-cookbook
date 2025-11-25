@@ -14,6 +14,62 @@ Spring AI 项目受到了 Python 生态中 LangChain 和 LlamaIndex 等优秀项
 
 作为 Spring 生态系统的一部分，Spring AI 继承了 Spring 框架的核心优势：依赖注入、自动配置、可测试性等。这使得它能够无缝集成到现有的 Spring Boot 应用中，为 Java 开发者提供了一个熟悉且强大的 AI 开发工具。
 
+## Spring AI 发展历程
+
+::: timeline 2023-11-22
+
+- **Spring AI 项目启动**
+
+- Spring 官方团队宣布启动 Spring AI 项目
+
+- 项目初始概念和设计理念确定
+
+:::
+
+::: timeline 2024-05-01
+
+- **首个 Milestone 版本发布**
+
+- Spring AI 发布首个 Milestone 版本
+
+- 支持 OpenAI、Azure OpenAI 等基础模型集成
+
+- 提供 Chat、Embedding 等核心 API
+
+:::
+
+::: timeline 2024-11-14
+
+- **Spring AI 1.0.0 GA 正式发布**
+
+- 首个稳定版本发布，标志着框架的成熟
+
+- 支持 20+ 种 AI 模型提供商
+
+- 支持 14+ 种向量数据库
+
+- 完整的 RAG、Tool Calling、Chat Memory 等功能
+
+:::
+
+::: timeline 2025-05-20
+
+- **Spring AI 1.1.0 GA 发布**
+
+- 支持 Model Context Protocol（MCP）集成
+
+- 新增 Prompt Caching（提示缓存）功能
+
+- 支持 Reasoning / "Thinking" Mode（推理模式）
+
+- 增强的 RAG 功能和向量存储支持
+
+- 改进的工具调用和 Chat Memory 功能
+
+- 增强的安全性和可观测性
+
+:::
+
 ## 为什么选择 Spring AI
 
 ### 对于 Java 开发者的天然优势
