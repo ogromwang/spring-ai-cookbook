@@ -29,12 +29,6 @@ public class StartedApplication {
      * @param args 启动参数, 通常为命令行传入的参数
      */
     public static void main(String[] args) {
-        // 设置必要的参数(这里使用通义千问的 openai api)
-        System.setProperty("spring.ai.openai.api-key", System.getenv("QIANWEN_API_KEY"));
-        System.setProperty("spring.ai.openai.base-url", "https://dashscope.aliyuncs.com/compatible-mode");
-        // 需使用非思考模型
-        System.setProperty("spring.ai.openai.chat.options.model", "qwen2.5-14b-instruct");
-
         SpringApplication app = new SpringApplication(StartedApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
         ConfigurableApplicationContext ctx = app.run(args);
@@ -44,10 +38,7 @@ public class StartedApplication {
         ChatClient client = ChatClient.create(chatModel);
 
         String reply = client.prompt("我说 ping, 你说 pong").call().content();
-
         System.out.println("AI 回复: " + reply);
-
-        // 关闭应用上下文
         ctx.close();
     }
 }

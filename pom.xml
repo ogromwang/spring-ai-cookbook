@@ -10,11 +10,12 @@
     </parent>
     <groupId>dev.dong4j.ai</groupId>
     <artifactId>spring-ai-cookbook</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>${revision}</version>
+
     <name>spring-ai-cookbook</name>
     <description>Spring AI CookBook</description>
     <packaging>pom</packaging>
-    <url/>
+    <url>https://github.com/dong4j/spring-ai-cookbook</url>
     <licenses>
         <license>
             <name>MIT License</name>
@@ -22,18 +23,30 @@
         </license>
     </licenses>
     <developers>
-        <developer/>
+        <developer>
+            <id>dong4j</id>
+            <name>dong4j</name>
+            <email>dong4j@gmail.com</email>
+            <url>https://github.com/dong4j</url>
+            <organization>Zeka.Stack</organization>
+            <organizationUrl>https://github.com/zeka-stack</organizationUrl>
+            <timezone>+08:00</timezone>
+        </developer>
     </developers>
     <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
+        <connection>scm:git:https://github.com/dong4j/spring-ai-cookbook.git</connection>
+        <developerConnection>scm:git:git@github.com:dong4j/spring-ai-cookbook.git</developerConnection>
+        <tag>HEAD</tag>
+        <url>https://github.com/dong4j/spring-ai-cookbook</url>
     </scm>
     <properties>
+        <revision>1.0.0-SNAPSHOT</revision>
+
         <java.version>25</java.version>
         <spring-ai.version>1.1.0</spring-ai.version>
         <google-java-format.version>1.23.0</google-java-format.version>
+
+        <flatten-maven-plugin.version>1.5.0</flatten-maven-plugin.version>
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -138,6 +151,39 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>${flatten-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                        <phase>process-resources</phase>
+                        <configuration>
+                            <updatePomFile>true</updatePomFile>
+                            <flattenMode>ossrh</flattenMode>
+                            <pomElements>
+                                <distributionManagement>remove</distributionManagement>
+                                <dependencyManagement>remove</dependencyManagement>
+                                <repositories>remove</repositories>
+                                <scm>keep</scm>
+                                <url>keep</url>
+                                <organization>resolve</organization>
+                            </pomElements>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                        <phase>clean</phase>
                     </execution>
                 </executions>
             </plugin>

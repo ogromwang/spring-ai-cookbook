@@ -1,38 +1,47 @@
-# 快速搭建 Spring AI 项目
+# Spring AI 特性概览
 
-## 最小化 Chat 应用
+在 [[guide/2.quick-start|快速开始]] 的终端示例里，我们搭建了一个最小化的 Spring Boot 应用并调用 Spring AI 返回了第一条聊天结果。
 
-### 1. 创建 Spring Boot 项目
+虽然流程极简，但完全依赖终端操作：前置环境多、脱离日常开发场景、对非 Linux/Unix 用户也不够友好，而且仅覆盖了 Chat Client API 的最基础能力，对理解 Spring AI 帮助有限。
 
-```bash [bash]
-curl https://start.spring.io/starter.zip \
-  -d dependencies=spring-ai-openai \
-  -d bootVersion=3.5.8 \
-  -d javaVersion=17 \
-  -d type=maven-project \
-  -o spring-ai-demo.zip
+因此本章节改用贴近真实项目的最小案例，逐个演示 Spring AI 的核心特性，先建立整体认知，再在后续章节深入每个功能点。
+
+## 前置准备
+
+此项目基于 Maven 多模块构建, 已在父 pom.xml 中添加了必要的依赖以及版本信息, 比如 `spring-ai-bom`, `Spring Boot` 的版本, JDK 的版本等, 所以在各个子模块中只会添加必要的依赖.
+
+接下来你应该准备一下环境:
+
+1. 安装 JDK25
+2. 通过各种途径获取至少一个 AI 服务商的 API_KEY 并设置到环境变量中
+3. 保持网络畅通 🥲
+
+## Chat Client API
+
+::: code-group
+
+```xml [xml:添加依赖]
+<dependency>
+    <groupId>org.springframework.ai</groupId>
+    <artifactId>spring-ai-starter-model-openai</artifactId>
+</dependency>
 ```
 
-### 2. 修改启动类
+```yaml [yaml:添加配置]
+spring:
+  ai:
+    openai:
+      api-key: ${QIANWEN_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          model: qwen2.5-14b-instruct
+```
 
-```java [java]
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.openai.OpenAiChatModel;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.WebApplicationType;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.context.ConfigurableApplicationContext;
-
+```java [java:修改启动类]
 @EnableAutoConfiguration
 public class StartedApplication {
-
     public static void main(String[] args) {
-        // 设置必要的参数(这里使用通义千问的 openai api)
-        System.setProperty("spring.ai.openai.api-key", System.getenv("QIANWEN_API_KEY"));
-        System.setProperty("spring.ai.openai.base-url", "https://dashscope.aliyuncs.com/compatible-mode");
-        // 需使用非思考模型
-        System.setProperty("spring.ai.openai.chat.options.model", "qwen2.5-14b-instruct");
-
         SpringApplication app = new SpringApplication(StartedApplication.class);
         app.setWebApplicationType(WebApplicationType.NONE);
         ConfigurableApplicationContext ctx = app.run(args);
@@ -41,34 +50,62 @@ public class StartedApplication {
         OpenAiChatModel chatModel = ctx.getBean(OpenAiChatModel.class);
         ChatClient client = ChatClient.create(chatModel);
 
-        String reply = client.prompt("我说 ping, 你说 pong")
-            .call()
-            .content();
-
+        String reply = client.prompt("我说 ping, 你说 pong").call().content();
         System.out.println("AI 回复: " + reply);
-
-        // 关闭应用上下文
         ctx.close();
     }
 }
-
 ```
 
-### 3. 启动测试
-
-::: code-group
-
-```bash [bash]
-./mvnw spring-boot:run
-```
-
-```
-AI 回复: pong! 😊 你想玩别的吗？
+```sh [sh:运行]
+AI 回复: pong! 😊 你想玩什么其他有趣的游戏吗？
 ```
 
 :::
 
+### 问题
+
+#### AI 输出后为什么没有退出应用
+
 ---
+
+## 提示词管理
+
+## 结构化输出
+
+## 多模态 API
+
+## 模型 API
+
+## 聊天模型
+
+## 嵌入模型
+
+## 图像模型
+
+## 音频模型
+
+## 内容审核
+
+## 聊天记忆
+
+## 工具调用
+
+## 模型上下文协议
+
+## 检索增强生成
+
+## 模型评估
+
+## 向量数据库
+
+## 可观测性
+
+## 编排
+
+## 测试容器
+
+## 资源
 
 ### 参考文档
 
