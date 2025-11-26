@@ -264,7 +264,32 @@ group.defineTemplate("audit", "请审查 {code}，并用 {language} 给出结果
 - **STGroup 分隔符设置**：
     - ✅ **正确方式**：`STGroup group = new STGroup('{', '}'); ST st = new ST(group, template);`（这是 Spring AI 的实现方式）
     - ❌ **错误方式**：`STGroup group = new STGroup(); group.delimiterStartChar = '{'; group.defineTemplate("name", "{code}");` - `defineTemplate` 在解析模板字符串时使用的是默认分隔符 `< >`，所以模板字符串中的 `{code}` 无法被识别
+
+- **对象属性访问**：
+    - ❌ **不能使用 record**：StringTemplate 通过反射访问对象的 getter 方法，而 Java record 的访问器方法名是 `name()` 而不是 `getName()`，导致模板无法正确访问属性
+
+    - ✅ **推荐使用 Lombok**：使用 `@Data` 或 `@Getter` 注解自动生成标准的 getter 方法（如 `getName()`），StringTemplate 可以正常访问
+
+      ```java [java]
+      // ❌ 这样不行 - record 的访问器方法名不匹配
+      record User(String name, int age) {}
+      ST template = new ST("用户：<user.name>"); // 无法访问，因为 record 是 name() 而不是 getName()
+      
+      // ✅ 推荐使用 Lombok
+      @Data
+      @NoArgsConstructor
+      @AllArgsConstructor
+      class User {
+          private String name;
+          private Integer age;
+      }
+      ST template = new ST("用户：<user.name>"); // 可以正常访问，Lombok 生成了 getName()
+      ```
+
+  > 📝 **完整测试用例**：参见 [StringTemplateDemoTest.renderPropertyAccess()](https://github.com/dong4j/spring-ai-cookbook/blob/main/1.spring-ai-started/src/test/java/dev/dong4j/ai/spring/prompt/StringTemplateDemoTest.java)
+
 - **列表参数**：同一个变量 `add` 多次就会生成列表，渲染时会自动拼成 `a,b,c`；需要其他格式要记得自定义 renderer。
+
 - **模板校验**：变量名拼写错了不会爆炸，而是直接原样输出，所以我现在习惯写完先加个单元测试跑一遍。
 
 总体来说，这套 API 非常符合“提示词就该简单”的理念：没有控制流、没有复杂语法，但该有的转义、分隔符、自定义 renderer 全都能满足。难怪 Spring AI 直接把它当默认实现。

@@ -248,6 +248,8 @@ String reply = client.prompt()
 
 ### 基本用法
 
+[StructuredOutputTest](https://github.com/dong4j/spring-ai-cookbook/blob/main/1.spring-ai-started/src/test/java/dev/dong4j/ai/spring/structured/StructuredOutputTest.java)
+
 ::: code-group
 
 ```java [java:使用 entity() 方法]
@@ -335,37 +337,11 @@ List<ActorFilms> results = converter.convert(content);
 
 :::
 
-### 数据类定义
-
-Spring AI 支持使用 Java `record` 或普通类来定义结构化数据：
-
-```java
-// 使用 record（推荐，简洁）
-record Movie(String title, Integer year, String director, List<String> genres) {}
-
-// 或使用普通类
-class Movie {
-    private String title;
-    private Integer year;
-    private String director;
-    private List<String> genres;
-    
-    // getters 和 setters
-}
-```
-
 ### 工作原理
 
 1. **自动格式生成**：`BeanOutputConverter` 会根据 Java 类的字段自动生成 JSON Schema 格式说明
 2. **提示词增强**：将格式说明添加到提示词中，引导 AI 生成符合格式的 JSON
 3. **自动解析**：AI 返回 JSON 后，Spring AI 自动将其解析为 Java 对象
-
-### 最佳实践
-
-1. **使用 record 类型**：Java 17+ 的 record 类型更简洁，适合定义不可变的数据结构
-2. **提供清晰的字段名**：使用有意义的字段名，AI 更容易理解并生成正确的数据
-3. **添加格式说明**：在提示词中明确说明输出格式要求，提高准确性
-4. **处理复杂嵌套**：对于复杂的嵌套结构，考虑使用 `ParameterizedTypeReference`
 
 ### 参考文档
 
