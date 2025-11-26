@@ -637,15 +637,20 @@ public class ChatController {
 **触发条件**（需要同时满足）：
 
 1. 推送到 `main` 或 `master` 分支
-2. 变更的文件是任意位置的 `README.md`（包括项目根目录和所有子模块）
+2. 变更的文件是任意位置的 `.md` 文件（包括 `README.md`、`docs/*.md` 等所有 Markdown 文件）
 3. 提交信息中包含 `@dd` 关键词
 
 **使用示例**：
 
 ```bash [bash]
-# 修改文档后提交
+# 修改文档后提交（可以是任意 .md 文件）
 git add 1.spring-ai-started/README.md
 git commit -m "更新模块文档 @dd"
+git push origin main
+
+# 或者修改其他 Markdown 文件
+git add docs/about/index.md
+git commit -m "更新关于页面 @dd"
 git push origin main
 ```
 
