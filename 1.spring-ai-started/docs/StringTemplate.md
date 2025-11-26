@@ -171,6 +171,104 @@ public class PromptExample {
 
 看起来是不是比字符串拼接清爽多了？
 
+## 在 Java 里怎么直接玩 StringTemplate？
+
+前面一直在讲 Spring AI 如何帮我们兜底，其实 StringTemplate 本身也可以直接在 Java 里用。我参考了官方文档（<https://github.com/antlr/stringtemplate4/blob/master/doc/java.md>），自己动手试了几段代码，大概是下面这种感觉。
+
+### 🧪 最小可运行示例
+
+```java
+import org.stringtemplate.v4.ST;
+
+public class QuickStart {
+
+    public static void main(String[] args) {
+        ST template = new ST("请用 <language> 一句话解释 <topic>");
+        template.add("language", "中文");
+        template.add("topic", "Spring AI");
+
+        String result = template.render();
+        System.out.println(result);
+    }
+}
+```
+
+- 模板里的变量用 `<language>`、`<topic>` 这种写法（默认分隔符是 `<` 和 `>`）。
+- `add` 方法一旦多次调用同名变量，就是往列表里追加；如果只想替换一次，就只调用一次。
+- `render()` 返回的就是最终字符串，没有额外依赖，非常轻量。
+
+### ⚙️ 自定义分隔符 & 批量模板
+
+官方文档里还提到 `STGroup`，用来集中定义模板并自定义分隔符。比如我不想用默认的 `< >`，改用 `{ }`，就可以这样写（注意分隔符只能是单个字符，我第一次写 `{{code}}` 直接报错 😅）：
+
+**方法一：直接使用 ST 构造函数（最简单）**
+
+```java
+import org.stringtemplate.v4.ST;
+
+// 直接指定分隔符
+ST template = new ST("请审查 {code}，并用 {language} 给出结果。", '{', '}');
+template.add("code", "public class Test {}");
+template.add("language", "中文");
+String result = template.render();
+```
+
+> 📝 **完整测试用例**：参见 [StringTemplateDemoTest.method1_directSTConstructor()](https://github.com/dong4j/spring-ai-cookbook/blob/main/1.spring-ai-started/src/test/java/dev/dong4j/ai/spring/prompt/StringTemplateDemoTest.java)
+
+**方法二：使用 STGroup + ST 构造函数（推荐，Spring AI 的实现方式）**
+
+这是 Spring AI 内部 `StTemplateRenderer` 使用的方式，最可靠：
+
+```java
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+
+// 使用 STGroup 构造函数传入分隔符
+STGroup group = new STGroup('{', '}');
+// 然后使用 ST 构造函数传入 group 和模板字符串
+ST template = new ST(group, "请审查 {code}，并用 {language} 给出结果。");
+
+template.add("code", "public class Test {}");
+template.add("language", "中文");
+String result = template.render();
+```
+
+> 📝 **完整测试用例**：参见 [StringTemplateDemoTest.method2_stGroupWithSTConstructor()](https://github.com/dong4j/spring-ai-cookbook/blob/main/1.spring-ai-started/src/test/java/dev/dong4j/ai/spring/prompt/StringTemplateDemoTest.java)
+
+**方法三：使用 STGroup.defineTemplate（不推荐，有坑）**
+
+```java
+import org.stringtemplate.v4.ST;
+import org.stringtemplate.v4.STGroup;
+
+// ⚠️ 注意：这种方式有问题！
+// defineTemplate 在解析模板字符串时使用的是默认分隔符 < >
+// 所以即使设置了自定义分隔符，模板字符串中的 {code} 也无法被识别
+STGroup group = new STGroup();
+group.delimiterStartChar = '{';
+group.delimiterStopChar = '}';
+group.defineTemplate("audit", "请审查 {code}，并用 {language} 给出结果。"); // ❌ 这样不行
+```
+
+> 📝 **完整测试用例**：参见 [StringTemplateDemoTest.method3_defineTemplateWithCustomDelimiter_fails()](https://github.com/dong4j/spring-ai-cookbook/blob/main/1.spring-ai-started/src/test/java/dev/dong4j/ai/spring/prompt/StringTemplateDemoTest.java) - 演示为什么不行
+
+**总结**：`defineTemplate` 方法在解析模板字符串时总是使用默认分隔符 `< >`，无法配合自定义分隔符使用，因此不推荐使用这种方式。建议使用方法一或方法二。
+
+方法一和方法二在两个场景特别好用：
+
+1. **提示词里有大量 `{}`、`<>`**：我可以换成单字符的其他分隔符（例如 `{ }`、`[ ]`、`^ ^`），避免和正文冲突。
+2. **多人协作**：把模板集中放在 `STGroup` 或 `.stg` 文件里，大家只要记得模板名称和参数就能复用。
+
+### 🤔 我踩到的小坑
+
+- **STGroup 分隔符设置**：
+    - ✅ **正确方式**：`STGroup group = new STGroup('{', '}'); ST st = new ST(group, template);`（这是 Spring AI 的实现方式）
+    - ❌ **错误方式**：`STGroup group = new STGroup(); group.delimiterStartChar = '{'; group.defineTemplate("name", "{code}");` - `defineTemplate` 在解析模板字符串时使用的是默认分隔符 `< >`，所以模板字符串中的 `{code}` 无法被识别
+- **列表参数**：同一个变量 `add` 多次就会生成列表，渲染时会自动拼成 `a,b,c`；需要其他格式要记得自定义 renderer。
+- **模板校验**：变量名拼写错了不会爆炸，而是直接原样输出，所以我现在习惯写完先加个单元测试跑一遍。
+
+总体来说，这套 API 非常符合“提示词就该简单”的理念：没有控制流、没有复杂语法，但该有的转义、分隔符、自定义 renderer 全都能满足。难怪 Spring AI 直接把它当默认实现。
+
 ## 与其他模板引擎的对比
 
 这里简单对比一下，帮助理解 Spring AI 为什么选 StringTemplate：

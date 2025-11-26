@@ -68,9 +68,11 @@ public class PromptExample {
     public String promptWithTemplate(String language, String topic) {
         return chatClient
             .prompt()
-            .user(u -> u.text("用 {language} 一句话解释 {topic}")
-                .param("language", language)
-                .param("topic", topic))
+            .user(
+                u ->
+                    u.text("用 {language} 一句话解释 {topic}")
+                        .param("language", language)
+                        .param("topic", topic))
             .call()
             .content();
     }
@@ -86,12 +88,9 @@ public class PromptExample {
     public String customDelimiterTemplate(String code) {
         return chatClient
             .prompt()
-            .user(u -> u.text("请用一句话审查以下代码: <code>")
-                .param("code", "public class Test { }"))
-            .templateRenderer(StTemplateRenderer.builder()
-                                  .startDelimiterToken('<')
-                                  .endDelimiterToken('>')
-                                  .build())
+            .user(u -> u.text("请用一句话审查以下代码: <code>").param("code", "public class Test { }"))
+            .templateRenderer(
+                StTemplateRenderer.builder().startDelimiterToken('<').endDelimiterToken('>').build())
             .call()
             .content();
     }

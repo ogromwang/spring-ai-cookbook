@@ -34,5 +34,4 @@ class SimpleChatClientExampleTest {
 
         System.out.println("AI 回复: " + response);
     }
-
 }

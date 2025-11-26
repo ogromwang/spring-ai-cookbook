@@ -1,8 +1,9 @@
 package dev.dong4j.ai.spring.prompt;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+
+import jakarta.annotation.Resource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 class PromptExampleTest {
 
-    @Autowired
+    @Resource
     private PromptExample promptExample;
 
     /** 测试简单提示词功能 */
@@ -60,8 +61,7 @@ class PromptExampleTest {
     /** 测试自定义模板分隔符功能 */
     @Test
     void testCustomDelimiterTemplate() {
-        String response =
-            promptExample.customDelimiterTemplate("public class Test { }");
+        String response = promptExample.customDelimiterTemplate("public class Test { }");
 
         assertThat(response).isNotNull();
         assertThat(response).isNotEmpty();
