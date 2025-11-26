@@ -562,6 +562,8 @@ spring:
 
 ## 嵌入模型
 
+todo-;2025.11.26
+
 嵌入模型（Embedding Model）将文本转换为数值向量，用于语义搜索、相似度计算、RAG 等场景。
 
 ::: code-group
