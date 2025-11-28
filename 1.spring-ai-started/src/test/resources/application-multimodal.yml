@@ -1,0 +1,18 @@
+spring:
+  ai:
+    # 多模态模型配置
+    # 注意：多模态功能需要支持视觉的模型，如 GPT-4 Vision、Claude 3 等
+    openai:
+      api-key: ${QIANWEN_API_KEY}
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      chat:
+        options:
+          # 使用支持多模态的模型
+          # 通义千问支持多模态的模型：
+          #   - qwen-vl-max: 最强性能，支持多模态
+          #   - qwen-vl-plus: 高性能，支持多模态
+          # 如需切换模型，修改下面的 model 值即可
+          model: qwen-vl-plus
+          temperature: 0.7
+          max-tokens: 2000
+

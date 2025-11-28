@@ -31,6 +31,40 @@ function getModuleDisplayName(modulePath) {
 }
 
 /**
+ * 获取模块 docs 目录下的额外文档
+ * @param {string} modulePath - docs 目录中的模块路径
+ * @param {string} relativePath - 相对 docs 的路径（用于生成链接）
+ */
+function getModuleDocItems(modulePath, relativePath) {
+  const items = []
+
+  if (!fs.existsSync(modulePath)) {
+    return items
+  }
+
+  const files = fs.readdirSync(modulePath, {withFileTypes: true})
+  for (const file of files) {
+    if (!file.isFile() || !file.name.endsWith('.md') || file.name === 'index.md') {
+      continue
+    }
+
+    const docPath = path.join(modulePath, file.name)
+    const title = getDocumentTitle(docPath)
+    if (!title) {
+      continue
+    }
+
+    const link = `/${relativePath}/${file.name.replace(/\.md$/, '')}`
+    items.push({
+                 text: title,
+                 link: link
+               })
+  }
+
+  return items.sort((a, b) => a.text.localeCompare(b.text, 'zh-CN'))
+}
+
+/**
  * 递归查找所有模块（从 docs 目录）
  */
 function findModules(dir, basePath = '') {
@@ -66,8 +100,16 @@ function findModules(dir, basePath = '') {
 
         // 递归查找子模块
         const subModules = findModules(modulePath, relativePath)
-        if (subModules.length > 0) {
-          moduleInfo.items = subModules
+        const docItems = getModuleDocItems(modulePath, relativePath)
+
+        if (subModules.length > 0 || docItems.length > 0) {
+          moduleInfo.items = []
+          if (subModules.length > 0) {
+            moduleInfo.items.push(...subModules)
+          }
+          if (docItems.length > 0) {
+            moduleInfo.items.push(...docItems)
+          }
         }
 
         modules.push(moduleInfo)
@@ -417,6 +459,7 @@ export default defineConfig(
         nav: [
           {text: '🏠 首页', link: '/'},
           {text: '🚀 开始', link: '/1.spring-ai-started/'},
+          {text: '📝 更新日志', link: '/changelog'},
           {text: '📊 统计', link: 'https://umami.dong4j.site/share/o0wIhLdP1EwFcdCt/spring-ai.dong4j.site', target: '_blank'}
         ],
 

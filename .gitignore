@@ -19,9 +19,11 @@ buildNumber.properties
 .settings/
 .classpath
 .project
+.flattened-pom.xml
 
 # AI
 .cursorrules
+.cursor/
 
 # OS
 .DS_Store

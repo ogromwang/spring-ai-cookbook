@@ -492,6 +492,7 @@ public class ChatController {
 - 不管是单模块还是多模块, 每个代码模块下都 **必须** 有一个 **README.md** 文件, 这个 README.md 文件就是对应章节的教程, 在执行 GitHub Action 时会通过脚本完成自动部署.
 
 - 图片放在 `imgs/` 目录下（支持 PNG、JPG 等格式，部署时会自动转换为 WebP）
+- 若希望在不影响主教程叙事节奏的前提下补充更深入的案例、FAQ 或实验笔记，可在模块根目录新增 `docs/` 目录，并随意创建一个或多个 `.md` 文件。执行 `docs/sync-docs.sh` 后，这些文档会被同步到 `docs/<module>/` 中，与 `index.md` 同级，并在站点侧边栏里作为当前模块的子菜单显示（优先级低于数字子模块），从而实现“主线内容 + 扩展阅读”双轨呈现。
 
 **非数字开头的目录**（如 `guide`、`about`）：
 
@@ -636,15 +637,20 @@ public class ChatController {
 **触发条件**（需要同时满足）：
 
 1. 推送到 `main` 或 `master` 分支
-2. 变更的文件是任意位置的 `README.md`（包括项目根目录和所有子模块）
+2. 变更的文件是任意位置的 `.md` 文件（包括 `README.md`、`docs/*.md` 等所有 Markdown 文件）
 3. 提交信息中包含 `@dd` 关键词
 
 **使用示例**：
 
 ```bash [bash]
-# 修改文档后提交
+# 修改文档后提交（可以是任意 .md 文件）
 git add 1.spring-ai-started/README.md
 git commit -m "更新模块文档 @dd"
+git push origin main
+
+# 或者修改其他 Markdown 文件
+git add docs/about/index.md
+git commit -m "更新关于页面 @dd"
 git push origin main
 ```
 

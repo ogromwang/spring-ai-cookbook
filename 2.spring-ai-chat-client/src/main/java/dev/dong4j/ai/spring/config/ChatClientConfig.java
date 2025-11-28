@@ -33,23 +33,23 @@ public class ChatClientConfig {
     @Bean
     public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
         final OpenAiChatModel build =
-            chatModel
-                .mutate()
-                .defaultOptions(
-                    OpenAiChatOptions.builder()
-                        .model("qwen2.5-14b-instruct")
-                        .temperature(0.7)
-                        // 注意：如果是思考模型, 因为 extraBody 会创建嵌套的 extra_body 对象
-                        // 但通义千问 API 需要参数直接在请求体顶层
-                        // 因此当前无法通过 extraBody 设置 enable_thinking 参数
-                        //
-                        // 解决方案：
-                        // 1. 等待 Spring AI 未来版本支持将 extraBody 参数提升到顶层
-                        // 2. 自定义 OpenAiChatModel 实现来修改请求体
-                        // 3. 通过自定义 RestClient 拦截器修改请求（需要额外配置）
-                        // 4. 查看通义千问 API 文档，看是否支持通过其他方式控制思考功能
-                        .build())
-                .build();
+                chatModel
+                        .mutate()
+                        .defaultOptions(
+                                OpenAiChatOptions.builder()
+                                        .model("qwen2.5-14b-instruct")
+                                        .temperature(0.7)
+                                        // 注意：如果是思考模型, 因为 extraBody 会创建嵌套的 extra_body 对象
+                                        // 但通义千问 API 需要参数直接在请求体顶层
+                                        // 因此当前无法通过 extraBody 设置 enable_thinking 参数
+                                        //
+                                        // 解决方案：
+                                        // 1. 等待 Spring AI 未来版本支持将 extraBody 参数提升到顶层
+                                        // 2. 自定义 OpenAiChatModel 实现来修改请求体
+                                        // 3. 通过自定义 RestClient 拦截器修改请求（需要额外配置）
+                                        // 4. 查看通义千问 API 文档，看是否支持通过其他方式控制思考功能
+                                        .build())
+                        .build();
         return ChatClient.create(build);
     }
 

@@ -1,0 +1,54 @@
+// StringTemplate 模板文件示例
+// 用于测试从文件加载模板的功能
+
+// 简单模板
+simplePrompt(language, topic) ::= <<请用 <language> 一句话解释 <topic>。>>
+
+// 列表渲染模板
+listPrompt(items) ::= <<
+请分析以下项目：
+<items; separator=", ">
+>>
+
+// 条件渲染模板（使用 if 条件判断）
+// StringTemplate 4 使用 if/else 语法进行条件渲染
+conditionalPrompt(name, isVip) ::= <<
+<if(isVip)><vipGreeting(name)><else><normalGreeting(name)><endif>
+欢迎使用我们的服务！
+>>
+
+vipGreeting(name) ::= <<尊敬的 VIP 用户 <name>，>>
+
+normalGreeting(name) ::= <<用户 <name>，>>
+
+// 嵌套模板
+nestedPrompt(title, items) ::= <<
+标题：<title>
+
+<itemList(items)>
+>>
+
+itemList(items) ::= <<
+项目列表：
+<items:{item | - <item>}; separator=", ">
+>>
+
+// 属性访问模板
+propertyAccessPrompt(user) ::= <<
+用户信息：
+姓名：<user.name>
+年龄：<user.age>
+邮箱：<user.email>
+>>
+
+// 多值属性模板
+multiValuePrompt(tags) ::= <<
+标签：<tags; separator=", ">
+>>
+
+// 默认值模板
+// StringTemplate 4 使用 if/else 实现默认值逻辑
+defaultValuePrompt(name, role, defaultRole, hasRole) ::= <<
+<name> 的角色是 <if(hasRole)><role><else><defaultRole><endif>。
+>>
+

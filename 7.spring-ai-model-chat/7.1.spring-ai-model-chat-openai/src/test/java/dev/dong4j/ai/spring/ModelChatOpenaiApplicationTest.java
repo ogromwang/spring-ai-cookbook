@@ -24,4 +24,3 @@ class ModelChatOpenaiApplicationTest {
     @Test
     void contextLoads() {}
 }
-

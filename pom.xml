@@ -71,6 +71,11 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <modules>
@@ -124,6 +129,34 @@
                         </dependency>
                     </dependencies>
                 </plugin>
+                <!-- Maven Surefire Plugin -->
+                <!-- 配置测试运行时的 JVM 参数，解决 Java 25 下的兼容性问题 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <!--
+                            JVM 参数说明：
+                            1. @{argLine}: 保留其他插件（如 JaCoCo）可能添加的参数
+                            2. -XX:+EnableDynamicAgentLoading: 允许 Mockito 在运行时动态加载 Java agent
+                            3. -Xshare:off: 禁用类数据共享（CDS），避免 bootstrap classpath 修改导致的警告
+                            4. -enable-native-access=ALL-UNNAMED: 允许未命名模块访问受限的本地方法（消除 jansi 库警告）
+                            5. -add-opens: 开放 Java 内部 API 访问权限，避免模块系统限制产生的警告
+                               - java.base/sun.nio.ch=ALL-UNNAMED: 开放 sun.nio.ch 包给未命名模块
+                               - java.base/java.io=ALL-UNNAMED: 开放 java.io 包给未命名模块
+                            注意: sun.misc.Unsafe 的废弃警告来自第三方库（如 guava），无法通过 JVM 参数消除
+                            这些配置是 Java 9+ 模块系统下运行测试框架（Mockito、ByteBuddy）和 Maven 依赖库的标准做法
+                        -->
+                        <argLine>
+                            @{argLine}
+                            -XX:+EnableDynamicAgentLoading
+                            -Xshare:off
+                            --enable-native-access=ALL-UNNAMED
+                            --add-opens java.base/sun.nio.ch=ALL-UNNAMED
+                            --add-opens java.base/java.io=ALL-UNNAMED
+                        </argLine>
+                    </configuration>
+                </plugin>
             </plugins>
         </pluginManagement>
         <plugins>
@@ -132,6 +165,15 @@
                 <groupId>com.spotify.fmt</groupId>
                 <artifactId>fmt-maven-plugin</artifactId>
                 <version>2.29</version>
+                <configuration>
+                    <filesNamePattern>.*\.java</filesNamePattern>
+                    <skipSourceDirectory>false</skipSourceDirectory>
+                    <skipTestSourceDirectory>false</skipTestSourceDirectory>
+                    <skipSortingImports>false</skipSortingImports>
+                    <skipRemovingUnusedImports>false</skipRemovingUnusedImports>
+                    <skipReflowingLongStrings>false</skipReflowingLongStrings>
+                    <style>aosp</style>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
@@ -139,6 +181,13 @@
                         </goals>
                     </execution>
                 </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>com.google.googlejavaformat</groupId>
+                        <artifactId>google-java-format</artifactId>
+                        <version>1.28.0</version>
+                    </dependency>
+                </dependencies>
             </plugin>
             <!-- Checkstyle -->
             <plugin>

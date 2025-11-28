@@ -6,7 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 /**
  * ModelChatOpenaiApplication
  *
- * <p>Spring Boot 应用启动类, 用于启动 Chat Model OpenAI 应用程序. 该类通过 SpringApplication.run 方法启动 Spring Boot 应用, 初始化相关配置和组件.
+ * <p>Spring Boot 应用启动类, 用于启动 Chat Model OpenAI 应用程序. 该类通过 SpringApplication.run 方法启动 Spring Boot
+ * 应用, 初始化相关配置和组件.
  *
  * @author zeka.stack.team
  * @version 1.0.0
@@ -28,4 +29,3 @@ public class ModelChatOpenaiApplication {
         SpringApplication.run(ModelChatOpenaiApplication.class, args);
     }
 }
-
