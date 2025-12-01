@@ -10,7 +10,7 @@
 ### 思考
 在开始本章示例代码前，我们需要先知晓在 `Spring AI` 中是如何通过定义类与接口的关系来表达提示词相关信息。
 
-让我们想想，如何设计一个简单的翻译提示词，它的元素有什么？ 
+让我们想想，如何设计一个简单的翻译提示词，它的元素有什么？
 - 一份基础的角色定义
 - 一段简单的任务描述吩咐大模型开始为我们执行任务
 - 我们可能将部分入参能够动态放入到提示词中进行执行
@@ -34,10 +34,10 @@ The {object} is under the chair.
 在`Spring AI` 中，`Role` 是一个枚举类，它定义了提示词中的角色类型，包括 `system`、`user`、`assistant` 和 `tool`。
 ```java
 public enum MessageType {
-	USER("user"),
-	ASSISTANT("assistant"),
-	SYSTEM("system"),
-	TOOL("tool");
+    USER("user"),
+    ASSISTANT("assistant"),
+    SYSTEM("system"),
+    TOOL("tool");
     ...
 }
 ```
@@ -58,7 +58,7 @@ public interface Content {
 ```java
 public interface Message extends Content {
     // 获取消息类型 `system`、`user`、`assistant` 和 `tool`
-	MessageType getMessageType();
+   MessageType getMessageType();
 }
 ```
 关于`Message` 接口，Spring AI 官方也提供了详细的类型图
@@ -76,38 +76,62 @@ public class Prompt implements ModelRequest<List<Message>> {
 }
 ```
 
-### 4. PromptTemplate
+### 5. PromptTemplate
 提示词模板旨在促进创建结构化的提示词，
-将提示词内容定义为模板，并使用占位符进行填充，最终输出一个完整的提示词。
+将提示词内容定义为模板，并使用占位符进行填充，最终输出一个完整的提示词交给大模型。
 
+#### 1. PromptTemplateStringActions
+返回 `String` 类型的提示词模板渲染接口，专注于创建和渲染提示字符串，提示词接口中最基本的形式
 
-## 核心功能
+```java
+public interface PromptTemplateStringActions {
+	// 返回字符内容，不需要额外数据
+	String render();
+	// 可结合参数，替换提示词模板中的占位符
+	String render(Map<String, Object> model);
 
-### 1. 基础提示词管理
-- 简单字符串提示词
-- 多消息提示词组合
-- 带配置选项的提示词配置
+}
+```
 
-### 2. 提示词模板化
-- 基础占位符，如 `{variable}`
-- 自定义分隔符配置，如 `<variable>`
-- 资源文件模板加载
+#### 2. PromptTemplateMessageActions
+返回 `Message` 类型的提示词模板渲染接口，专为通过生成和操作 Message 对象来创建提示而设计
+还记得嘛？一个 `Message` 对象继承 `Content`，包含一个 `MessageType` 的 get 方法
 
-### 3. 多角色提示词
-- System 角色设置
-- User 角色处理
-- Assistant 角色管理
-- Tool/Function 角色支持
+```java
+public interface PromptTemplateMessageActions {
+    
+    // 直接创建一个 Message，不需要额外数据，用于静态或预定义的消息内容
+    Message createMessage();
+        
+    // 用 `List<Media>` 转换创建一个 Message
+    Message createMessage(List<Media> mediaList);
 
-### 4. 提示词工程技术
-- Zero-shot 学习技术
-- Few-shot 学习技术
-- Chain-of-Thought (思维链) 推理
-- ReAct (Reason + Act) 模式
-- 提示词优化策略
+    // 可结合参数，替换提示词模板中的占位符
+    Message createMessage(Map<String, Object> model);
+}
+```
 
+#### 3. PromptTemplateActions
+`PromptTemplateActions` 用于返回 `Prompt` 对象，从 #4. Prompt 中我们可以知道 `Prompt` 对象中含有一串 `Message` 和
+用于与大模型对话过程中可调节的一些参数对象 `ChatOptions`
+
+该接口继承至 `PromptTemplateStringActions` 他的定义如下
+
+```java
+public interface PromptTemplateActions extends PromptTemplateStringActions {
+
+	Prompt create();
+
+	Prompt create(ChatOptions modelOptions);
+
+	Prompt create(Map<String, Object> model);
+
+	Prompt create(Map<String, Object> model, ChatOptions modelOptions);
+}
+```
 
 ## 快速开始
+现在让我们快速进行配置，启动一个 Spring Boot 应用，并定义一些示例代码
 
 ### 1. 配置设置
 在 `application.yml` 中配置必要的参数：
@@ -118,9 +142,6 @@ spring:
     openai:
       base-url: https://dashscope.aliyuncs.com/compatible-mode
       api-key: ${QIANWEN_API_KEY}
-    anthropic:
-      api-key: ${ANTHROPIC_AUTH_TOKEN}
-      base-url: http://127.0.0.1:3456
 ```
 
 ### 2. 启动应用
@@ -166,7 +187,7 @@ curl "http://localhost:8080/roles/conversation?topic=Java编程"
 curl "http://localhost:8080/roles/tool-call?calculation=add&value1=10&value2=5"
 ```
 
-## 详细功能说明
+## 示例说明
 
 ### 基础提示词 (PromptController)
 
@@ -175,11 +196,10 @@ curl "http://localhost:8080/roles/tool-call?calculation=add&value1=10&value2=5"
 
 ```java
 @GetMapping("/simple")
-public String simplePrompt(@RequestParam(defaultValue = "Spring AI") String input) {
-    return openAiChatClient.prompt()
-            .user("Tell me just one interesting fact about " + input)
-            .call()
-            .content();
+public String simplePrompt(@RequestParam(defaultValue = "给我讲一个笑话吧") String input) {
+    return openAiChatClient.prompt(input)
+        .call()
+        .content();
 }
 ```
 
@@ -281,71 +301,230 @@ public String systemUserPrompt(
 
 ## 最佳实践指南
 
-### 1. 提示词设计原则
+### 提示词四大基础
 
-#### 清晰性和具体性
-- 使用明确的语言描述你想要的结果
-- 提供具体的示例和格式要求
-- 避免模糊不清的指令
+#### 1. 把话说清楚
+##### 1.1. 指令要"无歧义"
 
-#### 上下文提供
-- 提供足够的背景信息帮助 AI 理解任务
-- 使用 System 角色设定 AI 的专业领域和回应风格
-- 在多轮对话中保持上下文的连贯性
+确保指令明确具体，避免模糊表达
 
-#### 约束和指导
-- 明确指定输出格式（JSON、Markdown、列表等）
-- 设置长度限制和结构要求
-- 提供必要的约束条件避免无关内容
-
-### 2. 性能优化策略
-
-#### Token 使用优化
-- 精简提示词内容，移除冗余信息
-- 使用模板系统避免重复的上下文描述
-- 根据任务复杂度调整提示词长度
-
-#### 成本控制
-- 根据任务需求选择合适的模型（GPT-3.5 vs GPT-4）
-- 设置合理的最大 Token 限制
-- 实施缓存机制避免重复请求
-
-#### 响应质量保证
-- 使用适当的温度参数（创造性 vs 准确性）
-- 实施重试机制处理临时性错误
-- 添加质量验证和错误处理
-
-## 常见问题和解决方案
-
-## 进阶主题
-
-### 1. 多模态提示词
-Spring AI 支持多模态输入，包括文本、图像、音频等：
-
-```java
-// 创建包含图像的多模态消息
-UserMessage multimodalMessage = new UserMessage(
-    "请描述这张图片的内容",
-    new Media(MimeTypeUtils.IMAGE_JPEG, imageResource)
-);
-
-Prompt prompt = new Prompt(List.of(multimodalMessage));
-var response = chatModel.call(prompt);
+```text
+错误示例："分析一下这个"
+正确示例："总结这篇论文的关键发现，并用项目符号列表展示""
 ```
 
-## 总结
+##### 1.2. "要"什么，别"不要"什么
 
-Spring AI Prompts Cookbook 提供了全面的提示词管理解决方案，涵盖了从基础使用到高级优化的各个方面。通过掌握这些技术和最佳实践，开发者可以：
+明确表达你想要的内容，而非不想要的
 
-1. **提高开发效率**: 使用模板化和工具类快速构建提示词
-2. **优化使用成本**: 通过监控和优化策略控制 API 调用成本
-3. **提升响应质量**: 应用提示词工程技术获得更准确的 AI 回应
-4. **构建可靠应用**: 实施错误处理和监控机制确保系统稳定性
+```text
+错误示例："语气别太随意"
+正确示例："请使用正式、学术的语调写作。"
+```
 
-建议开发者根据具体项目需求选择合适的技术和方法，并持续优化提示词策略以获得最佳效果。
+##### 1.3. 什么时候用"不要"
+
+"不要"适用于"控制边界"，而非定义核心任务。
+使用"不要"来限定主题范围或排除不相关内容，帮助AI更精准地理解你的需求
+
+```text
+示例："解释什么是'经济计量学'，但不要使用复杂的数学公式或行话。"
+```
+
+
+#### 2. 给够上下文
+为AI提供充足的背景信息，有助于其准确理解任务并调用相关知识。
+
+##### 2.1. 喂饱背景信息
+
+提供任务相关的完整背景资料，避免信息碎片化
+
+##### 2.2. 指定"读者"是谁
+
+明确受众能帮助AI调整语言风格、术语和内容深度
+```text
+示例："给一个5岁小孩解释什么是量子计算"与"给一个物理学博士写量子计算的综述"
+```
+
+#### 3. 用好脚手架
+通过结构化的提示词，引导AI生成更可靠、更专业的答案
+
+##### 3.1. 给它一个"角色"
+
+赋予AI特定"人设"，使其以该角色的风格、术语和思维模式进行输出
+```text
+示例："你是一名资深前端开发工程师，精通现代 Web 技术栈，注重代码质量、性能与用户体验。"
+```
+
+##### 3.2. 用好"分隔符"
+
+使用清晰的分隔符区分提示词的不同部分，帮助AI理解结构
+```text
+示例：使用三重反引号或XML标签<example>来区分指令和背景资料
+```
+
+##### 3.3. 规定"输出格式"
+
+明确指定输出格式，便于程序调用或内容渲染
+```text
+示例："请用JSON格式回答"或"以Markdown表格形式展示结果"
+```
+
+#### 4. 学会"迭代"
+Prompt编写是一个持续测试、调整和优化的科学实验过程。目前有多种协助写好一份提示词的开源工具，可选择性使用
+
+##### 4.1. 迭代优化
+
+遵循 `"测试 -> 看哪儿不对 -> 调整 -> 再测试"` 的循环，不断优化提示词。
+
+##### 4.2. 应对常见"毛病"
+
+针对AI常见的幻觉、重复、模糊、前后不一等问题，采取不同策略，如使用RAG解决幻觉问题。
+
+##### 4.3. 像"写代码"一样管提示词
+
+对提示词进行版本控制、使用占位符动态填充数据、进行A/B测试，将其视为代码进行管理。
+
+
+### 提示词进阶指引
+
+#### 1. In-Context Learning（上下文学习）
+In-Context Learning（上下文学习）是大语言模型（Large Language Models, LLMs）中一种重要的推理能力，
+指的是模型在不更新自身参数的情况下，仅通过在输入提示（prompt）中提供若干示例（demonstrations），就能学会执行新任务的能力。
+
+```text
+提示：
+
+将文本分类为中性、负面或正面。
+文本：我认为这次假期还可以。
+情感：
+```
+
+```text
+输出：
+
+中性
+```
+
+在上面的提示词中，我们没有向模型提供任何示例——这就是 `Zero-Shot Learning` 零样本学习
+
+有时候我们发现在更复杂的任务上 `Zero-Shot Learning` 仍然表现不佳。模型可能没有按照我们的预期进行输出，
+这时候，`Few-Shot Learning` 可以作为一种技术，以启用上下文学习，让模型学习我们给定的示例用以引导模型，以实现更好的性能。
+
+`Few-Shot Learning` 适用于复杂任务，需要特定格式输出
+
+#### 2. 思维链
+
+要求AI"一步一步地思考"，将思考过程外化，从而提高复杂问题的准确率。适用于多步骤、有清晰顺序的问题
+
+```text
+问题 --> 逐步思考 --> 最终答案
+```
+
+示例：
+在数学题中，要求AI列出每一步计算过程
+
+
+#### 3. Self-Consistency（自洽性）
+
+CoT的增强版，通过多次独立计算，选择出现次数最多的答案，提高复杂推理的准确性。适用于有多种解法的问题（如数学）和开放性问题
+
+```text
+多次独立计算 --> 多数投票 --> 最终答案
+```
+
+示例：
+- 调高temperature参数，让AI进行多次（如10次）独立计算。
+- 选择出现次数最多的答案（少数服从多数）
+
+#### 4. 推理技术对比
+
+不同推理技术适用于不同类型的复杂任务，选择合适的技术可以提高AI解决问题的效率和准确性。
+
+| 技术          | 适用问题                       | 成本           | 复杂度 | 主要优势     |
+| ------------- | ------------------------------ | -------------- | ------ | ------------ |
+| 思维链 (CoT)  | 多步骤、有清晰顺序的问题       | 低             | 低     | 简单、可解释 |
+| 自洽性        | 有多种解法的问题（如数学）     | 中（N次调用）  | 低     | 准确、鲁棒性 |
+| 思维树 (ToT)  | 需要规划、探索、回溯的复杂问题 | 高（大量调用） | 高     | 解决超难题   |
+| 验证链 (CoVe) | 容易产生"幻觉"的事实性问题     | 中             | 较高   | 减少胡说八道 |
+
+
+#### 5. 从"思考"到"行动"：AI智能体技术
+
+##### ReAct (推理+行动)
+
+通过"思考-行动-观察"的循环，使AI能够：
+
+- 调用外部工具（如搜索引擎）
+- 获取实时信息
+- 解决仅凭静态知识无法回答的问题
+
+
+##### Reflexion（反思）
+
+ReAct的升级版，通过：
+
+- 生成"失败总结"并存储经验
+- 下次执行任务时避免犯同样的错误
+- 实现"吃一堑长一智"的学习能力
+
+##### PAL (程序辅助语言模型)
+
+将AI的"思考过程"以"代码"形式呈现：
+
+- AI负责理解问题和编写逻辑
+- 系统执行代码进行精确计算
+- 将精确计算交给擅长此任务的解释器
+
+#### 6. Meta-Prompting（元提示词）
+元提示词 是“用来生成提示词的提示词”。换句话说，它是一条指令，让 AI 帮你写出另一条更具体、更高质量的提示词。
+
+传统提示的局限性
+- 传统的提示通常由人类手动设计。
+- 手动设计提示可能需要大量的专业知识和反复试验，耗时耗力。
+- 手动设计的提示可能难以适应不同的任务或数据集。
+- 对于复杂的任务，手动设计提示可能难以充分发挥LLM 的潜力。
+
+##### 6.1. 元提示词的特点
+- 定义解决某类问题的通用框架
+- 让AI充当"提示工程师"角色
+- 生成可重用的提示词模板
+- 提高提示词编写的效率和一致性
+
+##### 6.2. 元提示词的应用场景
+- 创建领域通用提示模板
+- 构建特定任务的提示词框架
+- 让AI生成即使不懂领域知识也能写出80分提示词的模板
+- 减少重复编写相似提示词的工作量
+
+
+#### 7. Context Engineering（上下文工程）
+
+`Context Engineering` 的概念主要源自 Tobi Lütke 和 Andrej Karpathy 的推特：“It describes the core skill better: the art of providing all the context for the task to be plausibly solvable by the LLM.” （提供所有上下文的艺术，以使任务能够被 LLM 合理地解决） && "When in every industrial-strength LLM app, context engineering is the delicate art and science of filling the context window with just the right information for the next step." （上下文工程是一门微妙的艺术与科学，旨在在上下文窗口中填入恰到好处的信息，为下一步推理做准备）
+
+首先，什么是上下文（Context）？它是一种能提供给 LLM 的、用于完成下一步推理或生成任务的全部**信息**集合。引用一张图来进行概括：
+
+![上下文集合](https://pic3.zhimg.com/v2-3812bc36dc1eb599bbdec581d388ee02_1440w.jpg)
+
+为了更好的理解，我们可以将上下文信息按照以下分类：
+
+- 指导性上下文。这类上下文的核心功能是指导模型该做什么以及如何做，主要为模型行为设定框架，目标和规则。`Prompt Engineering` 一般囊括在这一层分类内
+
+- 信息性上下文。这类上下文的核心功能是告诉模型需要知道什么知识，为模型提供解决问题所必备的事实，数据与知识
+
+- 行动性上下文。这类上下文的核心功能是告诉模型能做什么以及做了之后的结果，为模型提供与外部世界交互的能力。它包括：Tool Definition；Tool Calls & Results / Tool Traces
+
+![上下文信息分类](https://picx.zhimg.com/v2-915e587da008d07dc35d7323070a4f39_1440w.jpg)
+
+上下文信息我们知道了，那么什么是上下文工程？
+
+`Context Engineering` 是一门系统性学科，专注于设计、构建并维护一个动态系统，该系统负责在 `Agent` 执行任务的每一步，为其智能地组装出最优的上下文组合，以确保任务能够被可靠、高效地完成。
+
 
 ## 参考资料
-- [Spring AI 官方文档](https://docs.spring.io/spring-ai/reference/)
-- [OpenAI API 文档](https://platform.openai.com/docs/api-reference)
-- [Anthropic Claude API 文档](https://docs.anthropic.com/claude/reference)
-- [提示词工程指南](https://www.promptingguide.ai/)
+- [Spring AI 官方文档](https://docs.spring.io/spring-ai/reference/api/prompt.html)
+- [提示词工程指南](https://www.promptingguide.ai/zh)
+- [Gemini 提示词指南 101](https://services.google.com/fh/files/misc/gemini-for-google-workspace-prompting-guide-101.pdf)
+- [火山提示词优化项目 PromptPilot](https://promptpilot.volcengine.com/workbench)
+- [开源提示词优化项目 YPrompt](https://github.com/fish2018/YPrompt)
+- [Language Models are Few-Shot Learners](https://arxiv.org/abs/2005.14165)
