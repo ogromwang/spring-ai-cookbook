@@ -154,13 +154,19 @@ mvn spring-boot:run
 #### 基础提示词示例
 ```bash
 # 简单字符串提示词
-curl "http://localhost:8080/prompts/simple?input=Spring%20AI"
+curl "http://localhost:8080/prompts/simple?input=给我讲个笑话吧"
+
+# 用户消息提示词
+curl "http://localhost:8080/prompts/user-message"
 
 # 多消息提示词
 curl "http://localhost:8080/prompts/multi-message"
 
-# 带选项的提示词
+# 带选项的提示词（创意模式）
 curl "http://localhost:8080/prompts/with-options?creative=true"
+
+# 带选项的提示词（普通模式）
+curl "http://localhost:8080/prompts/with-options?creative=false"
 ```
 
 #### 提示词模板示例
@@ -178,13 +184,16 @@ curl "http://localhost:8080/template/resource?language=Java"
 #### 多角色提示词示例
 ```bash
 # System + User 角色
-curl "http://localhost:8080/roles/system-user?assistantName=技术专家&voice=专业&question=微服务架构"
+curl "http://localhost:8080/roles/system-user?assistantName=技术专家&voice=专业且友好&question=请解释什么是微服务架构"
+```
 
-# 完整对话流
-curl "http://localhost:8080/roles/conversation?topic=Java编程"
+#### 提示词工程示例
+```bash
+# Zero-shot 学习技术
+curl "http://localhost:8080/engineering/zero-shot?task=情感分类&input=这个产品的质量真的很棒！"
 
-# Tool 角色示例
-curl "http://localhost:8080/roles/tool-call?calculation=add&value1=10&value2=5"
+# Few-shot 学习技术
+curl "http://localhost:8080/engineering/few-shot?task=文本风格转换&input=请把这句话改为正式商务风格：我们明天开会讨论"
 ```
 
 ## 示例说明
@@ -196,10 +205,25 @@ curl "http://localhost:8080/roles/tool-call?calculation=add&value1=10&value2=5"
 
 ```java
 @GetMapping("/simple")
-public String simplePrompt(@RequestParam(defaultValue = "给我讲一个笑话吧") String input) {
+public String simplePrompt(@RequestParam(defaultValue = "给我讲个笑话吧") String input) {
     return openAiChatClient.prompt(input)
         .call()
         .content();
+}
+```
+
+#### 用户消息提示词
+显式创建 UserMessage 对象，提供更细粒度的控制：
+
+```java
+@GetMapping("/user-message")
+public String promptWithUserMessage() {
+    String userText = """
+        告诉我两种著名的编程语言，并分别为每种语言提供简要概述。
+        """;
+    UserMessage userMessage = new UserMessage(userText);
+
+    return openAiChatClient.prompt().messages(userMessage).call().content();
 }
 ```
 
@@ -209,16 +233,42 @@ public String simplePrompt(@RequestParam(defaultValue = "给我讲一个笑话�
 ```java
 @GetMapping("/multi-message")
 public String promptWithMultipleMessages() {
-    Message systemMessage = new SystemMessage("""
+    // 创建系统消息
+    var systemMessage = new SystemMessage("""
         你是一个专业的技术导师。
         你的回答应该简洁明了，重点突出核心概念。
         每个回答不要超过200字。
         """);
 
-    Message userMessage = new UserMessage("请解释什么是微服务架构？");
+    // 创建用户消息
+    var userMessage = new UserMessage("请解释什么是微服务架构？");
 
+    // 创建提示词
     Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
-    return chatModel.call(prompt).getResult().getOutput().getText();
+
+    // call
+    return openAiChatClient.prompt(prompt).call().content();
+}
+```
+
+#### 带选项的提示词
+通过配置选项控制 AI 模型的行为和输出特征：
+
+```java
+@GetMapping("/with-options")
+public String promptWithOptions(@RequestParam(defaultValue = "false") boolean creative) {
+    String promptText = "请用创意的方式解释什么是人工智能";
+
+    // 根据参数设置不同的选项
+    var options = creative
+        ? OpenAiChatOptions.builder().temperature(0.9).build()
+        : OpenAiChatOptions.builder().temperature(0.3).build();
+
+    Prompt prompt = new Prompt(promptText, options);
+    var content = openAiChatClient.prompt(prompt).call().content();
+
+    return String.format(
+        "创意模式: %s%n温度参数: %s%n%n%s", creative, options.getTemperature(), content);
 }
 ```
 
@@ -230,19 +280,19 @@ public String promptWithMultipleMessages() {
 ```java
 @GetMapping("/basic")
 public String basicTemplate(
-        @RequestParam(defaultValue = "interesting") String adjective,
-        @RequestParam(defaultValue = "AI") String topic) {
-    
-    PromptTemplate promptTemplate = new PromptTemplate(
-        "Tell me a {adjective} fact about {topic}");
+    @RequestParam(defaultValue = "interesting") String adjective,
+    @RequestParam(defaultValue = "AI") String topic) {
 
-    Map<String, Object> variables = Map.of(
-        "adjective", adjective,
-        "topic", topic
-    );
+    String template = "Tell me a {adjective} fact about {topic}";
 
-    Prompt prompt = promptTemplate.create(variables);
-    return chatModel.call(prompt).getResult().getOutput().getText();
+    PromptTemplate promptTemplate = new PromptTemplate(template);
+    Map<String, Object> variables = new HashMap<>();
+    variables.put("adjective", adjective);
+    variables.put("topic", topic);
+
+    String renderedPrompt = promptTemplate.render(variables);
+
+    return openAiChatClient.prompt().user(renderedPrompt).call().content();
 }
 ```
 
@@ -251,19 +301,77 @@ public String basicTemplate(
 
 ```java
 @GetMapping("/custom-delimiter")
-public String customDelimiterTemplate(@RequestParam(defaultValue = "John Williams") String composer) {
+public String customDelimiterTemplate(
+    @RequestParam(defaultValue = "John Williams") String composer) {
+
+    // 使用 StringTemplate 引擎的自定义分隔符
     var promptTemplate = PromptTemplate.builder()
-        .renderer(StTemplateRenderer.builder()
-            .startDelimiterToken('<')
-            .endDelimiterToken('>')
-            .build())
+        .renderer(
+            StTemplateRenderer.builder()
+                .startDelimiterToken('<')
+                .endDelimiterToken('>')
+                .build())
         .template("""
-            Tell me the names of 5 movies whose soundtrack was composed by <composer>.
-            For each movie, mention the year it was released.
+            告诉我由 <composer> 创作配乐的5部电影的名字。
+            对于每部电影，请注明其上映年份。
             """)
         .build();
 
-    return chatModel.call(promptTemplate.create(Map.of("composer", composer))).getResult().getOutput().getText();
+    Map<String, Object> variables = Map.of("composer", composer);
+    String renderedPrompt = promptTemplate.render(variables);
+
+    String response = openAiChatClient.prompt().user(renderedPrompt).call().content();
+
+    return String.format("渲染后的提示词:%n%s%n%nAI 回复:%n%s", renderedPrompt, response);
+}
+```
+
+#### 资源文件模板
+从资源文件加载模板内容，便于管理和维护：
+
+```java
+@GetMapping("/resource")
+public String resourceTemplate(@RequestParam(defaultValue = "Java") String language) {
+    try {
+        // 加载系统消息模板资源
+        ClassPathResource systemResource = new ClassPathResource("templates/system-message.st");
+        if (!systemResource.exists()) {
+            throw new IllegalStateException("模板文件不存在: templates/system-message.st");
+        }
+
+        // 使用 Spring 的 StreamUtils 读取为字符串（自动处理编码，默认 UTF-8）
+        String templateContent = StreamUtils.copyToString(
+            systemResource.getInputStream(),
+            StandardCharsets.UTF_8);
+
+        Map<String, Object> systemVariables = Map.of(
+            "language", language,
+            "name", "AI编程助手",
+            "voice", "专业且友好");
+
+        PromptTemplate systemPromptTemplate = PromptTemplate.builder()
+            .renderer(StTemplateRenderer.builder()
+                          .startDelimiterToken('<')
+                          .endDelimiterToken('>')
+                          .build())
+            .template(templateContent)
+            .build();
+
+        String systemPrompt = systemPromptTemplate.render(systemVariables);
+        String userMessage = "请介绍" + language + "的主要特性和应用场景";
+
+        String response = openAiChatClient
+            .prompt()
+            .system(systemPrompt)
+            .user(userMessage)
+            .call()
+            .content();
+
+        return String.format("系统模板变量: %s%n%nAI 回复:%n%s", systemVariables, response);
+
+    } catch (Exception e) {
+        return "模板加载失败: " + e.getMessage();
+    }
 }
 ```
 
@@ -275,27 +383,136 @@ System 角色用于定义 AI 的行为和回应风格，User 角色提供具体�
 ```java
 @GetMapping("/system-user")
 public String systemUserPrompt(
-        @RequestParam(defaultValue = "技术专家") String assistantName,
-        @RequestParam(defaultValue = "专业且友好") String voice,
-        @RequestParam(defaultValue = "请解释什么是微服务架构") String question) {
+    @RequestParam(defaultValue = "技术专家") String assistantName,
+    @RequestParam(defaultValue = "专业且友好") String voice,
+    @RequestParam(defaultValue = "请解释什么是微服务架构") String question) {
 
-    String systemText = """
-        你是一个有帮助的AI助手，帮助人们找到信息。
-        你的名字是：{name}
-        你应该用{voice}的语调来回应用户的请求。
-        回答应准确、全面且易于理解。
-        """;
+    String systemText =
+        """
+            你是一个有帮助的AI助手，帮助人们找到信息。
+            你的名字是：{name}
+            你应该用{voice}的语调来回应用户的请求。
+            回答应准确、全面且易于理解。
+            """;
 
     PromptTemplate systemPromptTemplate = new PromptTemplate(systemText);
-    Message systemMessage = systemPromptTemplate.createMessage(Map.of(
-        "name", assistantName,
-        "voice", voice
-    ));
+    Message systemMessage =
+        systemPromptTemplate.createMessage(
+            Map.of(
+                "name", assistantName,
+                "voice", voice));
 
     Message userMessage = new UserMessage(question);
+
     Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
-    
-    return chatModel.call(prompt).getResult().getOutput().getText();
+    var response = openAiChatClient.prompt(prompt).call().content();
+
+    return String.format("""
+        系统角色设置:
+        %s
+        助手名字: %s
+        回应风格: %s
+
+        用户问题: %s
+
+        AI 回复:
+        %s
+        """, systemText, assistantName, voice, question, response);
+}
+```
+
+### 提示词工程 (PromptEngineeringController)
+
+#### Zero-shot 学习技术
+让 AI 模型在没有先前示例的情况下完成特定任务：
+
+```java
+@GetMapping("/zero-shot")
+public String zeroShotPrompt(
+    @RequestParam(defaultValue = "情感分类") String task,
+    @RequestParam(defaultValue = "这个产品的质量真的很棒！") String input) {
+
+    String zeroShotTemplate =
+        """
+            你是一个专业的{task}专家。
+            请直接对以下内容进行{task}，无需额外解释。
+
+            输入内容：{input}
+
+            请以 JSON 格式输出结果：
+            {{"result": "你的分类结果", "confidence": "置信度"}}
+            """;
+
+    PromptTemplate promptTemplate = new PromptTemplate(zeroShotTemplate);
+    Map<String, Object> variables = Map.of("task", task, "input", input);
+
+    String renderedPrompt = promptTemplate.render(variables);
+    String response = openAiChatClient.prompt().user(renderedPrompt).call().content();
+
+    return String.format("""
+                         === Zero-shot 学习技术演示 ===
+                         任务类型: %s
+                         输入内容: %s
+                         技术说明: 模型在没有先前示例的情况下完成特定任务
+
+                         AI 处理结果:
+                         %s
+                         """, task, input, response);
+}
+```
+
+#### Few-shot 学习技术
+通过在提示词中提供少量示例来帮助 AI 模型理解任务模式：
+
+```java
+@GetMapping("/few-shot")
+public String fewShotPrompt(
+    @RequestParam(defaultValue = "文本风格转换") String task,
+    @RequestParam(defaultValue = "请把这句话改为正式商务风格：我们明天开会讨论") String input) {
+
+    String fewShotTemplate =
+        """
+            你是一个专业的{task}专家。
+
+            以下是一些{task}的示例：
+
+            示例1:
+            输入: "这个想法不错，我们试试看"
+            输出: "此建议具有可行性，建议予以采纳并试行"
+
+            示例2:
+            输入: "我搞不懂这个怎么回事"
+            输出: "对该问题存在理解困难，需要进一步说明"
+
+            示例3:
+            输入: "弄快点，没时间了"
+            输出: "请加快处理进度，时间较为紧迫"
+
+            现在请对以下内容进行{task}：
+            输入: "{input}"
+
+            输出:
+            """;
+
+    PromptTemplate promptTemplate = new PromptTemplate(fewShotTemplate);
+    Map<String, Object> variables =
+        Map.of(
+            "task", task,
+            "input", input);
+
+    String renderedPrompt = promptTemplate.render(variables);
+    String response = openAiChatClient.prompt().user(renderedPrompt).call().content();
+
+    return String.format("""
+                         === Few-shot 学习技术演示 ===
+                         任务类型: %s
+                         输入内容: %s
+                         技术说明: 通过提供少量示例帮助模型理解任务模式
+                         提供的示例数: 3个
+
+                         AI 处理结果:
+                         %s
+                         """, task, input, response);
 }
 ```
 

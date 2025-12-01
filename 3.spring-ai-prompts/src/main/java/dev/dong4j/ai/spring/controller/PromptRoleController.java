@@ -74,15 +74,15 @@ public class PromptRoleController {
         var response = openAiChatClient.prompt(prompt).call().content();
 
         return String.format("""
-            系统角色设置:
-            %s
-            助手名字: %s
-            回应风格: %s
+                                 系统角色设置:
+                                 %s
+                                 助手名字: %s
+                                 回应风格: %s
 
-            用户问题: %s
+                                 用户问题: %s
 
-            AI 回复:
-            %s
-            """, systemText, assistantName, voice, question, response);
+                                 AI 回复:
+                                 %s
+                                 """, systemText, assistantName, voice, question, response);
     }
 }
