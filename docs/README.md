@@ -111,6 +111,68 @@ docs/guide/
 - 文件名中的编号用于排序，不会出现在链接中
 - 所有图片资源建议放在 `guide/imgs/` 目录下，使用 WebP 格式
 
+## 模块 docs 目录多文档菜单
+
+模块的 `docs/` 目录（如 `1.spring-ai-started/docs/`）支持多个文档文件，这些文档会自动显示在对应模块的子菜单中。
+
+### 文件命名规则
+
+在模块的 `docs/` 目录下创建文档时，使用编号前缀来控制菜单顺序：
+
+- `1.文件名.md` - 编号文档，链接为 `/模块名/1.文件名`，按编号排序
+- `2.文件名.md` - 编号文档，链接为 `/模块名/2.文件名`，按编号排序
+- `文件名.md` - 无编号文档，链接为 `/模块名/文件名`，排在所有编号文档之后
+
+### 目录结构示例
+
+```
+1.spring-ai-started/
+├── README.md              # 主教程（同步为 index.md）
+├── docs/                  # 扩展文档目录
+│   ├── 1.StringTemplate.md    # StringTemplate 详解 (排序: 1)
+│   └── 2.Advanced.md          # 高级用法 (排序: 2)
+└── imgs/                  # 图片资源
+    └── example.webp
+```
+
+同步后自动生成到 docs 目录：
+
+```
+docs/1.spring-ai-started/
+├── index.md               # 从 README.md 同步而来
+├── 1.StringTemplate.md    # 从 docs/1.StringTemplate.md 同步而来
+├── 2.Advanced.md          # 从 docs/2.Advanced.md 同步而来
+└── imgs/                  # 图片自动复制
+```
+
+### 菜单显示规则
+
+1. **菜单文本**：自动使用文档的一级标题（`#` 后的内容）作为菜单项文本
+2. **排序规则**：
+    - 编号文档按数字从小到大排序（如 1, 2, 3...）
+    - 无编号文档排到最后（sortKey: 9999）
+3. **链接生成**：
+    - `1.StringTemplate.md` → `/1.spring-ai-started/1.StringTemplate`
+    - `2.Advanced.md` → `/1.spring-ai-started/2.Advanced`
+
+### 示例
+
+侧边栏中的模块菜单将显示：
+
+```
+入门
+  └─ Spring AI 快速开始
+      ├─ StringTemplate        (来自 docs/1.StringTemplate.md)
+      └─ Advanced             (来自 docs/2.Advanced.md)
+```
+
+### 注意事项
+
+- 文档的一级标题（`# 标题`）将作为菜单项文本
+- 文件名中的编号用于排序，会保留在链接中（如 `/1.spring-ai-started/1.StringTemplate`）
+- 所有图片资源建议放在模块的 `imgs/` 目录下，使用 WebP 格式
+- 这些文档与主教程（`index.md`）同级显示，优先级低于数字子模块
+
 ## 如何新增目录和文档
 
 ### 两种目录类型
