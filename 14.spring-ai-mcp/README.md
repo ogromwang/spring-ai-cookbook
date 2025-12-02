@@ -1,70 +1,40 @@
 # 模型上下文协议(MCP)
 
-## 1. 简介
+## 什么是 MCP？
 
-模型上下文协议（MCP）是一个创新的开源协议，它重新定义了大语言模型（LLM）与外部世界的互动方式。MCP 提供了一种标准化方法，使任意大语言模型能够轻松连接各种数据源和工具，实现信息的无缝访问和处理。MCP 就像是 AI 应用程序的 USB-C 接口，为 AI 模型提供了一种标准化的方式来连接不同的数据源和工具。
+想象一下，你的 AI 助手就像一个智能机器人，但它本身只能"思考"，无法直接操作现实世界。MCP（Model Context Protocol，模型上下文协议）就像是为这个机器人提供的一套**标准化的"插件系统"**。
 
-### 1.1 服务架构
+### 一个简单的比喻
+
+如果把 AI 模型比作一台电脑，那么 MCP 就像是电脑的 **USB-C 接口**：
+
+- 任何符合 MCP 标准的"外设"（工具、数据源）都可以轻松接入
+- 不需要为每个外设都开发一套专用接口
+- 插上就能用，拔掉也不影响电脑本身
+
+### MCP 能做什么？
+
+MCP 让 AI 模型能够：
+
+- 🔧 **调用工具**：比如查询天气、发送邮件、操作数据库
+- 📚 **读取数据**：从各种数据源获取信息作为上下文
+- 💬 **使用提示词模板**：复用常用的提示词，提高效率
+
+> 💡 **快速入门提示**：作为快速入门教程，这里我们只需要了解 MCP 的基本概念即可。不需要现在就深入理解所有细节，先跟着示例代码走一遍，感受一下 Spring AI MCP 的使用方式。等有了整体认识后，再深入学习也不迟！
+
+### 架构示意
 
 ![](./imgs/20251129_P3vrNW.svg)
 
-### 1.2 Agent架构
+## 快速上手
 
-![](./imgs/20251129_5bX318.svg)
+让我们通过一个简单的例子来快速了解 Spring AI MCP。我们会创建一个天气查询服务，然后创建一个客户端来调用它。
 
-### 1.3 MCP流程调用
+> 🎯 **目标**：通过这个例子，你会了解如何创建一个 MCP 服务端和客户端，并看到它们是如何协作的。不需要理解所有细节，先跑起来再说！
 
-![](./imgs/20251129_zvtyql.svg)
+### 前置准备
 
-### 1.4 官方架构
-
-MCP就像是USB-C一样，可以让不同设备通过相同的接口连接在一起
-
-![](./imgs/20251129_uVOeDf.png)
-
-## 2. MCP概念
-
-通俗一点讲MCP是作为一个远程的标准化的服务接口，在与大模型交互时，客户端端会自动通过标注协议获取远程服务的相关信息作为上下文传递给大模型
-
-- Tools：服务器暴露可执行功能，供LLM调用以与外部系统交互
-- Resources：服务器暴露数据和内容，供客户端读取并作为LLM上下文
-- Prompts：服务器定义可复用的提示模板，引导LLM交互
-- Sampling：让服务器借助客户端向LLM发起完成请求，实现复杂的智能行为
-- Roots：客户端给服务器指定的一些地址，用来高速服务器该关注哪些资源和去哪里找这些资源
-
-### 2.1 Tools
-
-服务器所支持的工具能力，使用提供的装饰器就可以定义对应的工具
-
-### 2.2 Resources
-
-类似于服务端定义了一个api接口用于查询数据，可以给大模型提供上下文
-
-### 2.3 Prompt
-
-提示词，用于在服务端定义好自己的提示词来进行复用
-
-### 2.4 Images
-
-MCP提供的一个Image类，可以自动处理图像数据
-
-### 2.5 Context
-
-Context 对象为您的工具和资源提供对 MCP 功能的访问权限，在服务端的工具中可以调用对应的资源数据
-
-### 2.6 Server
-
-自定义Server提供了更加灵活的方式来组合资源、工具，包括服务启动的生命周期流程的控制
-
-### 2.7 Sampling
-
-MCP为我们提供的一个在执行工具前后可以执行的一些操作，类似回调函数
-
-## 3. Spring AI MCP
-
-### 3.1 依赖版本
-
-Spring AI组件提供MCP服务组件框架集成，目前框架只支持 **Spring Boot 3.4.x**
+首先，确保你的项目使用 **Spring Boot 3.4.x**，并添加 Spring AI 的依赖管理：
 
 ```xml
 <dependency>  
@@ -76,7 +46,11 @@ Spring AI组件提供MCP服务组件框架集成，目前框架只支持 **Sprin
 </dependency>
 ```
 
-### 3.2 简单MCP服务端
+### 第一步：创建 MCP 服务端
+
+服务端的作用是"暴露能力"——告诉外界："我可以做什么"。
+
+#### 1. 添加依赖
 
 ```xml
 <dependencies>  
@@ -87,61 +61,50 @@ Spring AI组件提供MCP服务组件框架集成，目前框架只支持 **Sprin
 </dependencies>
 ```
 
-#### 3.2.1 启动类
+#### 2. 创建启动类
+
+标准的 Spring Boot 启动类，没什么特别的：
 
 ```java
 @SpringBootApplication  
 public class McpServerApplication {  
-  
-    /**  
-     * Main     *     * @param args args  
-     * @since 1.0.0  
-     */    public static void main(String[] args) {  
+    public static void main(String[] args) {  
         SpringApplication.run(McpServerApplication.class, args);  
     }  
-  
 }
 ```
 
-#### 3.2.2 工具服务
+#### 3. 定义工具服务
+
+这里我们创建一个天气查询服务。注意 `@Tool` 注解，它告诉 Spring AI："这个方法是一个工具，可以被 MCP 客户端调用"：
 
 ```java
 @Service  
 public class WeatherService {  
-  
-    /**  
-     * Query weather     *     * @param city city  
-     * @return the string  
-     * @since 1.0.0  
-     */    @Tool(description = "天气查询")  
+    @Tool(description = "天气查询")  
     public String queryWeather(String city) {  
-        return "天气查询";  
+        return city + "的天气是18°";  
     }  
-  
 }
 ```
 
-#### 3.2.3 注册工具
+#### 4. 注册工具
+
+告诉 Spring AI 框架："这个服务里的工具可以被 MCP 使用"：
 
 ```java
 @Configuration  
 public class McpServerAutoConfiguration {  
-  
-    /**  
-     * Weather tools     *     * @param weatherService weather service  
-     * @return the tool callback provider  
-     * @since 1.0.0  
-     */    @Bean  
+    @Bean  
     public ToolCallbackProvider weatherTools(WeatherService weatherService) {  
         return MethodToolCallbackProvider.builder()  
                 .toolObjects(weatherService)  
                 .build();  
     }  
-  
 }
 ```
 
-#### 3.2.4 配置文件
+#### 5. 配置文件
 
 ```yml
 spring:  
@@ -159,29 +122,13 @@ logging:
     console:
 ```
 
-注意：创建的配置文件，必须要禁用banner否则客户端读取时就会出现以下错误
+> ⚠️ **重要提示**：`banner-mode: off` 这一行很重要！如果不禁用 banner，客户端读取时会出错。记住这一点就好。
 
-```txt
-10:15:40.979 [pool-1-thread-1] ERROR io.modelcontextprotocol.client.transport.StdioClientTransport -- Error processing inbound message for line: 
-com.fasterxml.jackson.databind.exc.MismatchedInputException: No content to map due to end-of-input
- at [Source: REDACTED (`StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION` disabled); line: 1]
-	at com.fasterxml.jackson.databind.exc.MismatchedInputException.from(MismatchedInputException.java:59)
-	at com.fasterxml.jackson.databind.ObjectMapper._initForReading(ObjectMapper.java:5008)
-	at com.fasterxml.jackson.databind.ObjectMapper._readMapAndClose(ObjectMapper.java:4910)
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3860)
-	at com.fasterxml.jackson.databind.ObjectMapper.readValue(ObjectMapper.java:3843)
-	at io.modelcontextprotocol.spec.McpSchema.deserializeJsonRpcMessage(McpSchema.java:153)
-	at io.modelcontextprotocol.client.transport.StdioClientTransport.lambda$startInboundProcessing$6(StdioClientTransport.java:261)
-	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:68)
-	at reactor.core.scheduler.SchedulerTask.call(SchedulerTask.java:28)
-	at java.base/java.util.concurrent.FutureTask.run$$$capture(FutureTask.java:264)
-	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java)
-	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1136)
-	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635)
-	at java.base/java.lang.Thread.run(Thread.java:840)
-```
+### 第二步：创建 MCP 客户端
 
-### 3.3 简单客户端
+客户端的作用是"使用能力"——连接到服务端，然后调用它提供的工具。
+
+#### 1. 添加依赖
 
 ```xml
 <dependencies>  
@@ -192,41 +139,24 @@ com.fasterxml.jackson.databind.exc.MismatchedInputException: No content to map d
 </dependencies>
 ```
 
-#### 3.3.1 启动类
+#### 2. 创建启动类
+
+同样，标准的 Spring Boot 启动类：
 
 ```java
 @SpringBootApplication  
 public class McpClientApplication {  
-  
-    /**  
-     * Main     *     * @param args args  
-     * @since 1.0.0  
-     */    public static void main(String[] args) {  
+    public static void main(String[] args) {  
         SpringApplication.run(McpClientApplication.class, args);  
     }  
-  
-```java
-@Bean  
-public CommandLineRunner predefinedQuestions(List<McpSyncClient> mcpSyncClients) {  
-    return args -> {  
-        mcpSyncClients.forEach(mcpSyncClient -> {    
-            mcpSyncClient.listTools().tools().forEach(tool -> {  
-                System.out.println("工具数据：" + tool.name());  
-            });  
-        });  
-    };  
 }
 ```
 
-```
+#### 3. 客户端配置
 
-### 3.4 通讯方式
+这里告诉客户端："去连接这个服务端"。`stdio` 表示使用标准输入输出进行通信（就像命令行工具那样）：
 
-#### 3.4.1 stdio
-
-标准的输入输出的方式进行通讯，跟python一样可以指定java启动某个java包，也可以使用npx启动某个npm的包
-
-```yaml
+```yml
 spring:  
   ai:  
     mcp:  
@@ -237,334 +167,85 @@ spring:
               command: java  
               args:  
                 - -jar  
-                - xxx.jar  
-            server2:  
-              command: npx  
-              args:  
-                - -y  
-                - "@modelcontextprotocol/server-filesystem"  
-                - /Users/haijun/Work/my-work/
+                - mcp-server.jar  # 你的服务端 jar 包路径
 ```
 
-#### 3.4.2 sse
+#### 4. 调用示例
 
-要支持sse可以使用以下依赖组件，下面的主键也同时支持stdio的方式通信
-
-```xml
-<dependency> 
-	<groupId>org.springframework.ai</groupId> 
-	<artifactId>spring-ai-starter-mcp-server-webmvc</artifactId> 
-</dependency>
-```
-
-客户端配置
-
-```yml
-spring:  
-  ai:  
-    mcp:  
-      client:  
-        sse:  
-          connections:  
-            server1: http://localhost:8080
-```
-
-服务端配置
-
-```yml
-spring:  
-  ai:  
-    mcp:  
-      server:  
-        name: stdio-mcp-server  
-        version: 1.0.0  
-        sse-endpoint: /sse  
-        sse-message-endpoint: /mcp/message
-```
-
-只需要修改配置即可，其余代码跟上面例子使用一样
-
-#### 3.4.3 webflux
-
-webflux的依赖包是同时兼容了，sse、stdio等方式进行通信，其余逻辑都是一样只是底层的代码变成了响应式
-
-```xml
-<dependency> 
-	<groupId>org.springframework.ai</groupId> 
-	<artifactId>spring-ai-starter-mcp-server-webflux</artifactId> 
-</dependency>
-
-<dependency>  
-    <groupId>org.springframework.ai</groupId>  
-    <artifactId>spring-ai-starter-mcp-client-webflux</artifactId>  
-</dependency>
-```
-
-### 3.5 常用API
-
-#### 3.5.1 Tools
-
-##### ToolCallbackProvider
-
-![](./imgs/20251129_naGufT.png)
-
-- MethodToolCallbackProvider：方法工具回调函数提供器
-- StaticToolCallbackProvider：里面包含了FunctionCallback包装了一层
-- SyncMcpToolCallbackProvider/AsyncMcpToolCallbackProvider：同步异步工具回调函数提供器
-
-```java
-@Bean  
-public ToolCallbackProvider weatherTools(WeatherService weatherService) {  
-    return MethodToolCallbackProvider.builder()  
-            .toolObjects(weatherService)  
-            .build();  
-}
-```
-
-##### ToolCallback
-
-通过上面的提供器最终构建的还是 **ToolCallback** 接口类型的实例对象
-
-![](./imgs/20251129_ij7yxF.png)
-
-- MethodToolCallback：普通@Tool标识的方法工具回调函数
-- FunctionToolCallback：函数回调工具
-- SyncMcpToolCallback/AsyncMcpToolCallback：同步异步工具回调函数
-
-#### 3.5.2 Resource
-
-资源，用于给mcp客户端提供资源的查询能力，例如：api接口，数据库查询。可以理解为spring mvc接口
-
-```java
-@Bean  
-public List<McpServerFeatures.SyncResourceSpecification> resource() {  
-    McpSchema.Annotations annotations = new McpSchema.Annotations(List.of(McpSchema.Role.USER), 0.1);  
-    var systemInfoResource = new McpSchema.Resource("/v1/api/query", "queryDatabase", "数据库查询", "", annotations);  
-    var resourceSpecification = new McpServerFeatures.SyncResourceSpecification(systemInfoResource, (exchange, request) -> {  
-        try {  
-            var systemInfo = Map.of("order", "叔叔叔叔");  
-            String jsonContent = new ObjectMapper().writeValueAsString(systemInfo);  
-            return new McpSchema.ReadResourceResult(  
-                    List.of(new McpSchema.TextResourceContents(request.uri(), "application/json", jsonContent)));  
-        } catch (Exception e) {  
-            throw new RuntimeException("Failed to generate system info", e);  
-        }  
-    });  
-    return List.of(resourceSpecification);  
-}
-```
-
-#### 3.5.3 Prompt
-
-提示词管理
-
-```java
-@Bean  
-public List<McpServerFeatures.SyncPromptSpecification> prompts1() {  
-    var prompt = new McpSchema.Prompt("greeting", "一个友好的提示词模板",  
-            List.of(new McpSchema.PromptArgument("name", "名称", true)));  
-  
-    var promptSpecification = new McpServerFeatures.SyncPromptSpecification(prompt,  
-            (exchange, getPromptRequest) -> {  
-                // 获取到里面的参数  
-                String nameArgument = (String) getPromptRequest.arguments().get("name");  
-                if (nameArgument == null) {  
-                    nameArgument = "朋友";  
-                }  
-                var userMessage = new McpSchema.PromptMessage(McpSchema.Role.USER, new McpSchema.TextContent("你好 " + nameArgument + "! 我可以帮助你什么?"));  
-                return new McpSchema.GetPromptResult("个性化问候语", List.of(userMessage));  
-            });  
-    return List.of(promptSpecification);  
-}
-```
-
-#### 3.5.4 Roots
-
-根资源管理，目的是用于告诉服务端需要关注的资源范围。当客户端连接到服务器时，会声明应该关注哪些根资源。根资源可以是文件路径，也可以是http url地址
-
-> file:///home/user/projects/myapp
-> https://api.example.com/v1
-
-第一步先配置客户端支持Roots根资源
-
-```java
-@Component  
-public static class CustomMcpSyncClientCustomizer implements McpSyncClientCustomizer {  
-    @Override  
-    public void customize(String serverConfigurationName, McpClient.SyncSpec spec) {  
-  
-        McpSchema.ClientCapabilities clientCapabilities = McpSchema.ClientCapabilities.builder()  
-        .experimental(Map.of())  
-        .roots(true)  
-        .sampling()  
-        .build();  
-        spec.capabilities(clientCapabilities);  
-  
-        spec.loggingConsumer((McpSchema.LoggingMessageNotification log) -> {  
-            System.out.println("消息提醒：" + log.data());  
-        });  
-    }  
-}
-```
-
-客户端启动后添加一个根资源
+现在可以调用服务端提供的工具了！这段代码会在应用启动时自动执行：
 
 ```java
 @Bean  
 public CommandLineRunner predefinedQuestions(List<McpSyncClient> mcpSyncClients) {  
     return args -> {  
         mcpSyncClients.forEach(mcpSyncClient -> {    
-            McpSchema.Root root = new McpSchema.Root("http://127.0.0.1", "端点");  
-            mcpSyncClient.addRoot(root);  
-        });  
-    };  
-}
-```
-
-服务监听根资源哪些需要监听，如果有资源发生变化则通过日志进行提醒
-
-```java
-@Bean  
-public BiConsumer<McpSyncServerExchange, List<McpSchema.Root>> rootsChangeHandler() {  
-    return (exchange, roots) -> {  
-        roots.forEach(root -> {  
-            String uri = root.uri();  
-            System.out.println("roots资源:" + uri);  
-  
-            McpSchema.LoggingMessageNotification notification = McpSchema.LoggingMessageNotification.builder()  
-                    .data("资源发生了变化")  
-                    .level(McpSchema.LoggingLevel.INFO)  
-                    .logger("rootsChangeHandler")  
-                    .build();  
-            exchange.loggingNotification(notification);  
-        });  
-    };  
-}
-```
-
-#### 3.5.5 Sampling
-
-客户端提供给服务端的回调函数
-
-```java
-@Component  
-public static class CustomMcpSyncClientCustomizer implements McpSyncClientCustomizer {  
-    @Override  
-    public void customize(String serverConfigurationName, McpClient.SyncSpec spec) {  
-  
-        // Sets a custom sampling handler for processing message creation requests.  
-        spec.sampling((McpSchema.CreateMessageRequest messageRequest) -> {  
-            // Handle sampling  
-            List<McpSchema.SamplingMessage> messages = messageRequest.messages();  
-            McpSchema.CreateMessageResult messageResult = null;  
-            for (McpSchema.SamplingMessage message : messages) {  
-                McpSchema.Content content = message.content();  
-                if ("text".equals(content.type())) {  
-                    McpSchema.TextContent textContent = (McpSchema.TextContent) content;  
-                    System.out.println("收到服务端的回调函数：" + textContent.text());  
-  
-                    messageResult = McpSchema.CreateMessageResult.builder()  
-                            .message("我确认：" + textContent.text())  
-                            .build();  
-                }  
-            }  
-            return messageResult;  
-        });   
-    }  
-}
-```
-
-服务端调用工具时发起调用sampling工具的请求
-
-```java
-/**  
- * Query weather * * @param city city  
- * @return the string  
- * @since 1.0.0  
- */
-@Tool(description = "天气查询")  
-public String queryWeather(String city, ToolContext toolContext) {  
-    System.out.println("回调函数确认：" + this.callMcpSampling(toolContext, city));  
-    return "天气查询";  
-}  
-  
-/**  
- * Call mcp sampling * * @param toolContext tool context  
- * @param city        city  
- * @return the string  
- * @since 1.0.0  
- */
-private String callMcpSampling(ToolContext toolContext, String city) {  
-    StringBuilder stringBuilder = new StringBuilder();  
-    McpToolUtils.getMcpExchange(toolContext)  
-            .ifPresent(exchange -> {  
-                if (exchange.getClientCapabilities().sampling() != null) {  
-                    McpSchema.CreateMessageRequest messageRequestBuilder = McpSchema.CreateMessageRequest.builder()  
-                            .messages(List.of(new McpSchema.SamplingMessage(McpSchema.Role.USER,  
-                                    new McpSchema.TextContent("你确定要查询:" + city))))  
-                            .build();  
-                    McpSchema.CreateMessageResult result = exchange.createMessage(messageRequestBuilder);  
-                    stringBuilder.append(result.content().text());  
-                }  
+            // 看看服务端提供了哪些工具
+            mcpSyncClient.listTools().tools().forEach(tool -> {  
+                System.out.println("发现工具：" + tool.name());  
             });  
-    return stringBuilder.toString();  
+            
+            // 调用天气查询工具
+            McpSchema.CallToolResult result = mcpSyncClient.callTool(
+                new McpSchema.CallToolRequest("queryWeather", Map.of("city", "北京"))
+            );
+            
+            // 打印结果
+            result.content().forEach(content -> {
+                if (content instanceof McpSchema.TextContent textContent) {
+                    System.out.println("查询结果：" + textContent.text());
+                }
+            });
+        });  
+    };  
 }
 ```
 
-#### 3.5.6 监听器
+### 通讯方式（简单了解）
 
-当工具、资源、提示词等资源进行变动时，都可以通过配置对应的消费者来监听数据的变动
+MCP 支持多种通讯方式，目前我们用的是 `stdio`（标准输入输出），这是最简单的方式。还有其他方式如 `SSE`、`WebFlux` 等，但作为快速入门，暂时不需要了解太多。
 
-```java
-@Component  
-public static class CustomMcpSyncClientCustomizer implements McpSyncClientCustomizer {  
-    @Override  
-    public void customize(String serverConfigurationName, McpClient.SyncSpec spec) {  
-  
-        // Customize the request timeout configuration
-        spec.requestTimeout(Duration.ofSeconds(30));  
-        McpSchema.ClientCapabilities clientCapabilities = McpSchema.ClientCapabilities.builder()  
-                .experimental(Map.of())  
-                .roots(true)  
-                .sampling()  
-                .build();  
-        spec.capabilities(clientCapabilities);  
-  
-        // Sets a custom sampling handler for processing message creation requests.  
-        spec.sampling((McpSchema.CreateMessageRequest messageRequest) -> {  
-            // Handle sampling  
-            return null;  
-        });  
-  
-        spec.toolsChangeConsumer((List<McpSchema.Tool> tools) -> {  
-        });  
-  
-        spec.resourcesChangeConsumer((List<McpSchema.Resource> resources) -> {  
-        });  
-  
-        spec.promptsChangeConsumer((List<McpSchema.Prompt> prompts) -> {  
-        });  
-  
-  
-        // 日志打印
-        spec.loggingConsumer((McpSchema.LoggingMessageNotification log) -> {  
-            System.out.println("消息提醒：" + log.data());  
-        });  
-    } 
-}
+> 📖 **想深入了解？** 更多关于通讯方式的详细配置，请参考 [docs/1.mcp-advanced.md](./docs/1.mcp-advanced.md)
+
+## 接下来做什么？
+
+恭喜！如果你已经成功运行了上面的示例，说明你已经掌握了 Spring AI MCP 的基本使用。现在你可能想知道：
+
+- **更多功能**：除了工具调用，MCP 还支持资源读取、提示词模板等高级功能
+- **适用场景**：MCP 适合什么场景？什么时候不应该用 MCP？
+- **常见问题**：遇到问题怎么办？有哪些坑需要注意？
+
+我们准备了详细的文档来回答这些问题：
+
+- 📚 **[MCP 进阶使用](./docs/1.mcp-advanced.md)** - 深入了解 MCP 的高级功能
+- 🤔 **[MCP 是最优解吗？](./docs/2.mcp-not-best.md)** - 了解 MCP 的适用场景
+- ⚠️ **[MCP 的局限性与安全性](./docs/3.mcp-problems.md)** - 了解需要注意的问题
+
+## 常见问题
+
+### Banner 错误
+
+**症状**：客户端启动时出现 JSON 解析错误
+
+**原因**：服务端输出了 banner，干扰了通信协议
+
+**解决**：确保服务端配置中有 `banner-mode: off`
+
+```yml
+spring:  
+  main:  
+    banner-mode: off
 ```
 
-## 4. 故障排除
+### 其他问题
 
-### 4.1 包装Request
+遇到其他问题？查看 [详细的问题排查指南](./docs/3.mcp-problems.md)
 
-在有些现有的服务中可能会对http请求类进行包装缓存一层
+## 探索更多
 
-## 5. 开源MCP市场
+想要找现成的 MCP 服务？或者想看看别人是怎么用的？这里有一些资源：
 
-- [魔搭社区MCP广场](https://www.modelscope.cn/mcp)
-- [MCP Server](https://mcp.so/)
-- [MCP客户端和服务端推荐](https://github.com/yzfly/Awesome-MCP-ZH?tab=readme-ov-file)
-- [Awesome MCP Servers](https://mcpservers.org/)
-- [Cursor MCP](https://cursor.directory/)
-- [官方提供的MCP服务](https://github.com/modelcontextprotocol/servers)
+- 🌟 [魔搭社区 MCP 广场](https://www.modelscope.cn/mcp) - 中文社区的 MCP 服务集合
+- 🔧 [MCP Server](https://mcp.so/) - MCP 服务目录
+- 📦 [Awesome MCP](https://github.com/yzfly/Awesome-MCP-ZH) - 中文 MCP 资源推荐
+- 🎯 [Cursor MCP](https://cursor.directory/) - Cursor 编辑器的 MCP 目录
+- 🏢 [官方 MCP 服务](https://github.com/modelcontextprotocol/servers) - MCP 官方提供的服务示例
