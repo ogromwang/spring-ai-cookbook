@@ -516,6 +516,11 @@ public String fewShotPrompt(
 }
 ```
 
+## 动手操练
+
+- 1. 将 `controller` 包下的所有接口改造为流式输出
+- 2. 在 `controller` 包下新增一个用于多模态的 `Prompt` 示例
+
 ## 最佳实践指南
 
 ### 提示词四大基础
