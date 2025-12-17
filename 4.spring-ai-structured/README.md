@@ -210,6 +210,8 @@ ChatClient openAiChatClient = ChatClient.builder(chatModel)
 
 > **优势**：  
 > 原生结构化输出由模型内部强制执行，**可靠性远高于仅靠提示词约束**，尤其适合生产环境。
+> 
+>⚠️ **注意** ：`AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT` 在 Spring AI Stable 1.1.2 以上版本中提供
 
 ### 重要限制：并非所有结构都支持
 
