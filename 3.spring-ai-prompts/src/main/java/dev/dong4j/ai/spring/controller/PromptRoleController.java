@@ -34,8 +34,7 @@ import java.util.Map;
 public class PromptRoleController {
 
     /** OpenAI 聊天客户端实例 */
-    @Resource
-    private ChatClient openAiChatClient;
+    @Resource private ChatClient openAiChatClient;
 
     /**
      * 演示 System + User 角色组合
@@ -43,18 +42,18 @@ public class PromptRoleController {
      * <p>该方法展示了如何组合系统消息和用户消息来创建上下文丰富的提示词。 System 角色用于定义 AI 的行为和回应风格，User 角色提供具体的问题或任务。
      *
      * @param assistantName AI助手名字
-     * @param voice         回应风格
-     * @param question      用户问题
+     * @param voice 回应风格
+     * @param question 用户问题
      * @return AI 模型的回复内容
      */
     @GetMapping("/system-user")
     public String systemUserPrompt(
-        @RequestParam(defaultValue = "技术专家") String assistantName,
-        @RequestParam(defaultValue = "专业且友好") String voice,
-        @RequestParam(defaultValue = "请解释什么是微服务架构") String question) {
+            @RequestParam(defaultValue = "技术专家") String assistantName,
+            @RequestParam(defaultValue = "专业且友好") String voice,
+            @RequestParam(defaultValue = "请解释什么是微服务架构") String question) {
 
         String systemText =
-            """
+                """
                 你是一个有帮助的AI助手，帮助人们找到信息。
                 你的名字是：{name}
                 你应该用{voice}的语调来回应用户的请求。
@@ -63,26 +62,28 @@ public class PromptRoleController {
 
         PromptTemplate systemPromptTemplate = new PromptTemplate(systemText);
         Message systemMessage =
-            systemPromptTemplate.createMessage(
-                Map.of(
-                    "name", assistantName,
-                    "voice", voice));
+                systemPromptTemplate.createMessage(
+                        Map.of(
+                                "name", assistantName,
+                                "voice", voice));
 
         Message userMessage = new UserMessage(question);
 
         Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
         var response = openAiChatClient.prompt(prompt).call().content();
 
-        return String.format("""
-                                 系统角色设置:
-                                 %s
-                                 助手名字: %s
-                                 回应风格: %s
+        return String.format(
+                """
+                系统角色设置:
+                %s
+                助手名字: %s
+                回应风格: %s
 
-                                 用户问题: %s
+                用户问题: %s
 
-                                 AI 回复:
-                                 %s
-                                 """, systemText, assistantName, voice, question, response);
+                AI 回复:
+                %s
+                """,
+                systemText, assistantName, voice, question, response);
     }
 }

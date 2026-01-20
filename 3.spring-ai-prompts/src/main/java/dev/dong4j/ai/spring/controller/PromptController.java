@@ -32,8 +32,7 @@ import java.util.List;
 public class PromptController {
 
     /** OpenAI 聊天客户端实例, 用于演示基础提示词功能 */
-    @Resource
-    private ChatClient openAiChatClient;
+    @Resource private ChatClient openAiChatClient;
 
     /**
      * 演示最简单的字符串提示词
@@ -58,7 +57,7 @@ public class PromptController {
     @GetMapping("/user-message")
     public String promptWithUserMessage() {
         String userText =
-            """
+                """
                 告诉我两种著名的编程语言，并分别为每种语言提供简要概述。
                 """;
         UserMessage userMessage = new UserMessage(userText);
@@ -77,12 +76,12 @@ public class PromptController {
     public String promptWithMultipleMessages() {
         // 创建系统消息
         var systemMessage =
-            new SystemMessage(
-                """
-                    你是一个专业的技术导师。
-                    你的回答应该简洁明了，重点突出核心概念。
-                    每个回答不要超过200字。
-                    """);
+                new SystemMessage(
+                        """
+                        你是一个专业的技术导师。
+                        你的回答应该简洁明了，重点突出核心概念。
+                        每个回答不要超过200字。
+                        """);
 
         // 创建用户消息
         var userMessage = new UserMessage("请解释什么是微服务架构？");
@@ -108,14 +107,14 @@ public class PromptController {
 
         // 根据参数设置不同的选项
         var options =
-            creative
-            ? OpenAiChatOptions.builder().temperature(0.9).build()
-            : OpenAiChatOptions.builder().temperature(0.3).build();
+                creative
+                        ? OpenAiChatOptions.builder().temperature(0.9).build()
+                        : OpenAiChatOptions.builder().temperature(0.3).build();
 
         Prompt prompt = new Prompt(promptText, options);
         var content = openAiChatClient.prompt(prompt).call().content();
 
         return String.format(
-            "创意模式: %s%n温度参数: %s%n%n%s", creative, options.getTemperature(), content);
+                "创意模式: %s%n温度参数: %s%n%n%s", creative, options.getTemperature(), content);
     }
 }

@@ -13,13 +13,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class McpServerApplication {
 
-  /**
-   * Main
-   *
-   * @param args args
-   * @since x.x.x
-   */
-  public static void main(String[] args) {
-    SpringApplication.run(McpServerApplication.class, args);
-  }
+    /**
+     * Main
+     *
+     * @param args args
+     * @since x.x.x
+     */
+    public static void main(String[] args) {
+        SpringApplication.run(McpServerApplication.class, args);
+    }
 }

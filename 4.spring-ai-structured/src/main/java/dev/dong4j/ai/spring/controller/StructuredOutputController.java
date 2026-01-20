@@ -5,6 +5,7 @@ import dev.dong4j.ai.spring.model.ActorsFilms;
 
 import jakarta.annotation.Resource;
 
+import org.springframework.ai.chat.client.AdvisorParams;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.converter.ListOutputConverter;
 import org.springframework.core.ParameterizedTypeReference;
@@ -182,12 +183,11 @@ public class StructuredOutputController {
      */
     @GetMapping("/native")
     public String nativeStructuredOutput() {
-        // 注意：这里的 AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT 是示例
-        // 实际使用时需要根据具体的 Spring AI 版本和配置调整
         try {
             ActorsFilms actorFilms =
-                    openAiChatClientWithNativeSupport
+                    openAiChatClient
                             .prompt()
+                            .advisors(AdvisorParams.ENABLE_NATIVE_STRUCTURED_OUTPUT)
                             .user("生成一个随机演员的电影作品列表。")
                             .call()
                             .entity(ActorsFilms.class);

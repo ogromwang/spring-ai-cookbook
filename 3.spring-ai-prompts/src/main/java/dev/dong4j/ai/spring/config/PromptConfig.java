@@ -31,13 +31,13 @@ public class PromptConfig {
     @Bean
     public ChatClient openAiChatClient(OpenAiChatModel chatModel) {
         return ChatClient.create(
-            chatModel
-                .mutate()
-                .defaultOptions(
-                    OpenAiChatOptions.builder()
-                        .model("Qwen/Qwen3-8B")
-                        .temperature(0.7)
-                        .build())
-                .build());
+                chatModel
+                        .mutate()
+                        .defaultOptions(
+                                OpenAiChatOptions.builder()
+                                        .model("Qwen/Qwen3-8B")
+                                        .temperature(0.7)
+                                        .build())
+                        .build());
     }
 }

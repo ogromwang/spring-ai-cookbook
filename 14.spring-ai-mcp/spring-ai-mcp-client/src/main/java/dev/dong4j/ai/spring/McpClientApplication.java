@@ -14,13 +14,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class McpClientApplication {
 
-  /**
-   * Main
-   *
-   * @param args args
-   * @throws Exception ex 1.0.0-SNAPSHOT
-   */
-  public static void main(String[] args) throws Exception {
-    SpringApplication.run(McpClientApplication.class);
-  }
+    /**
+     * Main
+     *
+     * @param args args
+     * @throws Exception ex 1.0.0-SNAPSHOT
+     */
+    public static void main(String[] args) throws Exception {
+        SpringApplication.run(McpClientApplication.class);
+    }
 }
