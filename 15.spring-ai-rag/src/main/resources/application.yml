@@ -1,4 +1,13 @@
 spring:
   application:
     name: spring-ai-rag
+  ai:
+    openai:
+      base-url: https://dashscope.aliyuncs.com/compatible-mode
+      api-key: ${QIANWEN_API_KEY}
+    embedding:
+      model: text-embedding-v3
 
+# 服务器配置
+server:
+  port: 8080
