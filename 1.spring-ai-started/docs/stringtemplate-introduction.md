@@ -1,4 +1,4 @@
-# StringTemplate
+# 简单了解一下 StringTemplate
 
 ## 前言
 
@@ -81,7 +81,7 @@ StringTemplate 有个很特别的设计原则：**模板里绝对不能有业务
 
 这意味着什么？意味着你不能在模板里做这些事：
 
-```velocity
+```txt
 ## Velocity 能这么写（但 StringTemplate 不行）
 #if ($user.age > 18)
     #set($discount = 0.8)
@@ -102,7 +102,7 @@ StringTemplate 认为，**计算折扣是业务逻辑，应该在 Java 代码里
 
 StringTemplate 的语法非常简单，就是 `$name$` 或 `{name}` 这种形式：
 
-```st
+```txt
 请用 {language} 语言解释 {topic} 的核心概念
 ```
 
@@ -319,3 +319,5 @@ group.defineTemplate("audit", "请审查 {code}，并用 {language} 给出结果
 - [StringTemplate 官方网站](https://www.stringtemplate.org/)
 - [StringTemplate GitHub](https://github.com/antlr/stringtemplate4)
 - [Spring AI ChatClient 文档](https://docs.spring.io/spring-ai/reference/api/chatclient.html)
+
+---

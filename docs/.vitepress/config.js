@@ -55,13 +55,29 @@ function getModuleDocItems(modulePath, relativePath) {
     }
 
     const link = `/${relativePath}/${file.name.replace(/\.md$/, '')}`
+
+    // 解析文件名前缀用于排序，如 1.introduction.md -> sortKey: 1
+    const match = file.name.match(/^(\d+)\.(.+)\.md$/)
+    let sortKey = 9999 // 默认无编号文件排到最后
+    if (match) {
+      sortKey = parseInt(match[1])
+    }
+
     items.push({
                  text: title,
-                 link: link
+                 link: link,
+                 sortKey: sortKey
                })
   }
 
-  return items.sort((a, b) => a.text.localeCompare(b.text, 'zh-CN'))
+  // 按 sortKey 排序
+  items.sort((a, b) => a.sortKey - b.sortKey)
+
+  return items.map(item => (
+      {
+        text: item.text,
+        link: item.link
+      }))
 }
 
 /**
